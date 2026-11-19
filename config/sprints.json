@@ -1,0 +1,9 @@
+{
+  "planningTimezone": "Asia/Beirut",
+  "dateStatus": "proposed; confirm internship deadline before creating or starting sprint",
+  "sprints": [
+    {"id": "S1", "name": "PanelCare S1 | Designed Frontend", "start": "2026-11-23", "end": "2026-12-06", "workingDays": 10, "goal": "Approve UI direction; navigate full coordinator and technician journeys with typed mock adapters, responsive design and local UI checks", "phase": "UX and frontend", "exitGate": "Signed-off wireframes, working mock-based routes, accessibility and responsive evidence, frozen API contract"},
+    {"id": "S2", "name": "PanelCare S2 | Secure Backend", "start": "2026-12-07", "end": "2026-12-20", "workingDays": 10, "goal": "Implement and independently test auth, schema, registry, recurrence, dispatch, inspection, and reports against contracts", "phase": "Backend and persistence", "exitGate": "Reproducible migrations, permission denials, idempotent 90-day recurrence, API and storage tests on isolated local data"},
+    {"id": "S3", "name": "PanelCare S3 | Integration and Release", "start": "2026-12-21", "end": "2027-01-03", "workingDays": 10, "goal": "Wire real services, pass cross-role E2E, validate with users, stage and release approved noncommercial demo to Vercel", "phase": "Integration, QA, deployment", "exitGate": "P0 flows tested in real staging, release checklist signed, production smoke, demo evidence, fallback and handoff"}
+  ]
+}

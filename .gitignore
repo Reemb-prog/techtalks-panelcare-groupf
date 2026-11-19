@@ -1,0 +1,16 @@
+node_modules/
+.next/
+out/
+coverage/
+test-results/
+playwright-report/
+.vercel/
+.env
+.env.*
+!.env.example
+.harness-local.json
+.DS_Store
+*.tsbuildinfo
+*.log
+supabase/.branches/
+supabase/.temp/

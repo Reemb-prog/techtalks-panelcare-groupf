@@ -1,0 +1,10 @@
+{
+  "lead": "reem",
+  "members": [
+    {"slug": "reem", "name": "Reem W. Basho", "focus": "Product owner, shared architecture, coordinator shell, integration, release", "github": null, "jiraAccountId": null},
+    {"slug": "rand", "name": "Rand Al Yaman", "focus": "Contracts, Supabase schema, maintenance scheduler and verification", "github": null, "jiraAccountId": null},
+    {"slug": "mahdi", "name": "Mahdi Dagher", "focus": "Visual system, coordinator frontend, registry and dispatch", "github": null, "jiraAccountId": null},
+    {"slug": "tarek", "name": "Tarek Bdairi", "focus": "Technician UX, inspections, reports and E2E QA", "github": null, "jiraAccountId": null}
+  ],
+  "reviewPolicy": "Human review by a non-author. Lead also signs off security, shared contracts and releases. A second reviewer reviews lead's work."
+}
