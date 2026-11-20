@@ -28,9 +28,9 @@ Initialize Next.js and repository quality gates
 1. Generate a Next.js App Router + TypeScript + Tailwind + ESLint app with create-next-app (npm, src/ dir, alias @/*) in a temp folder outside the repo, then copy only the allowed files into the repo root. Never overwrite harness files (README.md, .gitignore is merged by hand, AGENTS.md, CLAUDE.md, docs/, scripts/, config/).
 2. package.json scripts: dev, build, start, lint, typecheck (tsc --noEmit), test (vitest run), e2e (playwright test). Commit package-lock.json.
 3. Vitest (jsdom not needed yet; node env) with one smoke unit test under src/app/ so the test script passes honestly.
-4. Playwright config (chromium only, webServer = next dev) with one smoke spec placed under src/app/ is out of scope for e2e/ (owned by PC-S3-07), so keep testDir at src/app/__e2e__/.
+4. Playwright config (desktop Chrome + Pixel 7, webServer = next dev) with one smoke spec in src/app/__e2e__/ (e2e/ belongs to PC-S3-07).
 5. src/app/globals.css: Tailwind import and minimal reset only, no design tokens (src/styles/ belongs to PC-S1-02). src/app/page.tsx: one responsive placeholder page labelled PanelCare (no mock data, no fake features).
-6. .github/workflows/ci.yml: Node 22, npm ci, node scripts/ci.mjs (runs harness validate + lint/typecheck/test/build).
+6. CI: the existing .github/workflows/quality.yml already runs harness validate, check and node scripts/ci.mjs with npm cache once package-lock.json exists, so no new workflow is added.
 
 ## Edge cases and risks
 * create-next-app must not touch the harness: generating outside the repo removes the risk.
@@ -46,11 +46,11 @@ Initialize Next.js and repository quality gates
 
 ## Tests and evidence
 Intended: npm run lint; npm run typecheck; npm run test; npm run build
-Actual commands, date, environment and result (Passed/Failed/Not run/Blocked): NOT RUN
+Actual (2026-11-20, Windows 11, Node 23.1.0, npm 10.9.1): npm run lint Passed; npm run typecheck Passed; npm run test Passed (1 test); npm run build Passed; npm run e2e Passed (2: desktop + mobile, local Chromium); node scripts/harness.mjs check Passed (17 paths in scope); node scripts/ci.mjs Passed. GitHub Actions: Not run yet (runs on the PR).
 Screenshot/log link: NOT CAPTURED
 
 ## Risk, security and UX review
-Unknowns / mitigations / Impeccable critique if UI: TO COMPLETE
+Placeholder page only, no design decisions: no tokens, no web fonts (system stack) so PC-S1-02 owns typography. next-env.d.ts is gitignored (generated). e2e is not part of CI yet. Impeccable: n/a (no designed UI).
 
 ## Handoff
-Status: Planned | Files changed: none | Next step: obtain plan review
+Status: Ready for review | Files changed: package.json, package-lock.json, tsconfig.json, next.config.ts, postcss.config.mjs, eslint.config.mjs, vitest.config.ts, playwright.config.ts, .gitignore, src/app/ | Next step: PR review by Rand; then PC-S1-05 wires tokens into globals.css.
