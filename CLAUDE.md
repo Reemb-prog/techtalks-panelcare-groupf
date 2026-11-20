@@ -16,7 +16,7 @@ You are working as **one developer assistant on one assigned task branch** in a 
 
 * One short-lived branch **per Jira work item**, named \`sN/member/pc-sN-XX\`, always branched from current main. Do not create sprint-wide feature branches or develop directly on a member's permanent branch.
 * Sprint work can be parallel only when file ownership and interfaces do not conflict. Respect dependencies and the earliest start day in config. Jira is the live status truth, not guessed flags.
-* Frontend first: **design review → mock-backed UI → local UX signoff** in S1. Backend and database in S2. Real integration and release in S3. Implement contracts before both sides.
+* Frontend first: **design review → mock-backed UI → local UX signoff** in S1 (Nov 20 – Dec 1). Backend, database, real integration and the demo release in S2 (Dec 2 – Dec 13), each owner wiring real services into their own screens (approved four-week plan, CR-01). Implement contracts before both sides.
 * No unapproved feature expansion. P0 takes priority. No inverter telemetry, billing, inventory, native mobile app or customer portal in MVP.
 * User-specific data is private. Enforce authorization on server/database, not only the UI. Never commit secrets, identifiable customer fixtures or private image binaries.
 * Changes to provider, API contract, database schema, recurrence policy, role model, design system, deadline or spend require a documented impact review and lead signoff.

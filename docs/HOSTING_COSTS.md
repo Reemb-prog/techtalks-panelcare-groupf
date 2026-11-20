@@ -1,6 +1,6 @@
 # Free-first hosting and account reality
 
-**Checked against official provider materials on November 19, 2026.** Costs and limits can change; recheck at S3 release. No purchase, credit-card entry, paid upgrade or production deployment is authorized by this document.
+**Checked against official provider materials on November 19, 2026.** Costs and limits can change; recheck before the S2 demo deployment (PC-S3-08). No purchase, credit-card entry, paid upgrade or production deployment is authorized by this document.
 
 | Layer | Selected | $0 availability and meaningful constraint |
 | --- | --- | --- |

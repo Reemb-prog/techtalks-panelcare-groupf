@@ -58,4 +58,4 @@ Use Next.js Route Handlers, Zod parse and structured error objects \`{error:{cod
 
 ## Mock boundary
 
-S1 mock adapters implement exactly the same TypeScript interfaces as intended APIs; latency, errors, permission denial and empty scenarios are selectable. They are never silently imported in production after S3 signoff. S2 tests API directly without a UI. S3 swaps adapters, audits contract drift, then runs real two-role E2E.
+S1 mock adapters implement exactly the same TypeScript interfaces as intended APIs; latency, errors, permission denial and empty scenarios are selectable. They are never silently imported in production after the S2 release signoff (PC-S3-09). In S2 each owner first tests their API directly, then swaps their own screens to real adapters and audits contract drift; the cross-role E2E smoke (PC-S3-07) then runs against the real backend.

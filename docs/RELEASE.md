@@ -12,7 +12,7 @@
 
 ## Staging and release sequence
 
-1. Verify Jira PRs and S3 gate, \`node scripts/ci.mjs\`, actual Playwright E2E and SQL concurrency/authorization evidence. Freeze branch/tag, record SHA.
+1. Verify Jira PRs and the S2 release gate (PC-S3-09), \`node scripts/ci.mjs\`, actual Playwright E2E and SQL concurrency/authorization evidence. Freeze branch/tag, record SHA.
 2. Reem deploys a private preview with synthetic data and tests login, registry, scheduler, assignment, checklist photo, report and role denials. Check mobile and external image license manifest.
 3. Take export/backup, apply approved migrations, configure production environment, deploy only after approval. No destructive migration from a Claude prompt without explicit review.
 4. Perform safe production smoke: coordinator and technician demo accounts, no real personal info, manual protected generation with 90-day golden fixtures, denial of unauthorized cron, record creation/report read, scheduler logs and quota check.
