@@ -1,9 +1,37 @@
 {
   "planningTimezone": "Asia/Beirut",
-  "dateStatus": "proposed; confirm internship deadline before creating or starting sprint",
+  "dateStatus": "Approved by lead 2026-11-20 (D03 four-week deadline). Mirrors Jira project KAN, board 2. Sprints are started only by the lead in Jira.",
+  "dayNumbering": "Calendar days, weekends included: D1 is the sprint start date.",
   "sprints": [
-    {"id": "S1", "name": "PanelCare S1 | Designed Frontend", "start": "2026-11-23", "end": "2026-12-06", "workingDays": 10, "goal": "Approve UI direction; navigate full coordinator and technician journeys with typed mock adapters, responsive design and local UI checks", "phase": "UX and frontend", "exitGate": "Signed-off wireframes, working mock-based routes, accessibility and responsive evidence, frozen API contract"},
-    {"id": "S2", "name": "PanelCare S2 | Secure Backend", "start": "2026-12-07", "end": "2026-12-20", "workingDays": 10, "goal": "Implement and independently test auth, schema, registry, recurrence, dispatch, inspection, and reports against contracts", "phase": "Backend and persistence", "exitGate": "Reproducible migrations, permission denials, idempotent 90-day recurrence, API and storage tests on isolated local data"},
-    {"id": "S3", "name": "PanelCare S3 | Integration and Release", "start": "2026-12-21", "end": "2027-01-03", "workingDays": 10, "goal": "Wire real services, pass cross-role E2E, validate with users, stage and release approved noncommercial demo to Vercel", "phase": "Integration, QA, deployment", "exitGate": "P0 flows tested in real staging, release checklist signed, production smoke, demo evidence, fallback and handoff"}
-  ]
+    {
+      "id": "S1",
+      "jiraSprintId": 1,
+      "name": "PanelCare S1 | Designed Frontend",
+      "start": "2026-11-20",
+      "end": "2026-12-01",
+      "calendarDays": 12,
+      "goal": "Approve UI direction; navigate full coordinator and technician journeys with typed mock adapters, responsive design and local UI checks",
+      "phase": "UX and frontend",
+      "exitGate": "Signed-off wireframes, working mock-based routes, accessibility and responsive evidence, frozen API contract"
+    },
+    {
+      "id": "S2",
+      "jiraSprintId": 2,
+      "name": "PanelCare S2 | Backend, Integration and Demo",
+      "start": "2026-12-02",
+      "end": "2026-12-13",
+      "calendarDays": 12,
+      "goal": "Implement and test auth, schema, registry, recurrence, dispatch, inspections and reports; wire real services into own screens; cross-role smoke and minimal Vercel demo",
+      "phase": "Backend, integration, demo deployment",
+      "exitGate": "Reproducible migrations, permission denials, idempotent 90-day recurrence, cross-role E2E smoke, demo deployed with rollback, release signoff"
+    }
+  ],
+  "absorbed": {
+    "PC-S3-01": "PC-S2-02",
+    "PC-S3-02": "PC-S2-03",
+    "PC-S3-03": "PC-S2-06",
+    "PC-S3-04": "PC-S2-07",
+    "PC-S2-08": "PC-S3-09"
+  },
+  "backlog": "Items with \"deferred\": true have no sprint and cannot be started until the lead re-plans them."
 }
