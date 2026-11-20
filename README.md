@@ -37,7 +37,7 @@ The harness is shared **through Git**. It is not a central autonomous service th
 
 ## Dates
 
-Recommended three two-week sprints: S1 November 23–December 6, S2 December 7–20, S3 December 21–January 3. This is a six-week quality-focused plan; it **conflicts with the approximate December 13 deadline in the older development plan**. Confirm the actual deadline before starting Jira Sprint 1. If December 13 is fixed, see the constrained four-week path in [docs/ROADMAP.md](docs/ROADMAP.md). Do not silently promise three sprints within four weeks.
+Approved four-week plan (D03, CR-01): two 12-calendar-day sprints, weekends included. S1 November 20–December 1 (designed mock frontend) and S2 December 2–13 (backend, integration and demo). See [docs/ROADMAP.md](docs/ROADMAP.md) for the day sequence and [config/sprints.json](config/sprints.json) for the authoritative dates. The earlier six-week, three-sprint plan was not adopted.
 
 ## Existing code
 

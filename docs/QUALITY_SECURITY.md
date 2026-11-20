@@ -2,7 +2,9 @@
 
 ## Test layers per sprint
 
-| Layer | S1 mock UX | S2 backend | S3 integrated |
+Under the approved four-week plan (CR-01), S2 covers both the backend and the integrated columns: each owner proves their backend independently, then wires their own screens. Items deferred past Dec 13 (full audit, stress timing, user validation) are noted per item in config/work-items.json.
+
+| Layer | S1 mock UX | S2 backend | S2 integrated |
 | --- | --- | --- | --- |
 | Unit | Forms, DTO adapters, UI state, recurrence date fixtures | Domain algorithms, validations, state transitions | Regression |
 | Contract | Typed DTO/error shapes and mocked statuses | Actual API conforms to DTO, invalid inputs rejected | Verify adapters against live APIs |

@@ -15,12 +15,12 @@
 1. Use your connected Jira tools to list accessible sites, projects/spaces, current Scrum boards and configured issue types. Verify the exact target; do not silently create a duplicate project or new board.
 2. Determine the project key, board ID, Scrum sprint permission, whether Epics/Stories/Tasks/Subtasks exist, estimation field, allowed custom fields and status transitions. Query actual user accounts for Reem, Rand, Mahdi and Tarek. Names in \`config/team.json\` are **not** Jira account IDs.
 3. Inspect existing PanelCare epics, issues, labels, sprint names and links. Deduplicate based on stable local ID in issue description/label, not fuzzy title only.
-4. **Resolve the deadline conflict:** previously estimated December 13 versus proposed January 3 finish. Ask Reem which deadline is binding if not already confirmed. Do not create dated active sprints until she confirms the delivery shape. You may draft a backlog safely if she permits.
+4. **Deadline (resolved 2026-11-20):** the four-week deadline is binding (D03, CR-01): S1 Nov 20 – Dec 1 and S2 Dec 2 – Dec 13, Jira sprint IDs 1 and 2. Any further schedule change needs a new CR and lead approval.
 5. Show a concise impact report: existing vs to-create vs to-update, blocked identities/fields, sprint dates and any permissions issues. Request confirmation before bulk Jira writes.
 
 ## Create/update structure after approval
 
-* Use a Scrum board (not a Kanban-only board) and three planned two-week sprints S1/S2/S3 as in config, **or** the explicitly approved four-week fallback. Create all as *future* sprints, and **start only S1** when the lead says begin. For a free plan, avoid cross-project or automation-heavy requirements.
+* Use a Scrum board (not a Kanban-only board) and the two approved 12-day sprints S1/S2 from config/sprints.json; deferred items stay in the backlog with no sprint. Create all as *future* sprints, and **start only S1** when the lead says begin. For a free plan, avoid cross-project or automation-heavy requirements.
 * Create Epics for Foundation, Design, Contracts, Frontend, Backend, Quality, Integration, Deployment and Release (or reuse existing equivalents).
 * Each \`config/work-items.json\` item becomes one Jira Story or Task; use stable \`[PC-S1-01]\` in title/description and label \`harness-pc-s1-01\`. Fields: title, user outcome, acceptance, test proof, sprint, epic, owner, reviewer, points, first working day, PR-ready day, touch paths and local branch name.
 * Preserve existing useful Jira descriptions/comments. Update fields with an explicit diff. Never downgrade or close existing issues automatically.

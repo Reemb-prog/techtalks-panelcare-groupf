@@ -11,7 +11,7 @@
 5. **Design system:** document tokens and states. Install Impeccable deliberately using the official Claude Code plugin directions (from its GitHub README). Use its critique/audit commands where available; save **actual** outputs, not a claim.
 6. **High-fidelity screen + thin vertical slice:** build one representative customer list and technician job detail, review screenshots with real content, then extend reusable components.
 7. **Functional QA:** every visible control has a response; all forms have validation, save-state, failure and retry behavior. Mock data clearly labeled in S1.
-8. **Design review and revision:** gather feedback, fix material issues, run keyboard/responsive checks, then request S1 design approval. Repeat the research/plan/check cycle for any changed screen in S2/S3.
+8. **Design review and revision:** gather feedback, fix material issues, run keyboard/responsive checks, then request S1 design approval. Repeat the research/plan/check cycle for any changed screen in S2.
 
 ## Suggested visual system (to be approved, not treated as final brand)
 

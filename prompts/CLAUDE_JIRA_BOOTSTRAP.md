@@ -1,5 +1,7 @@
 # COPY THIS PROMPT INTO CLAUDE WITH JIRA ACCESS
 
+> **Status (2026-11-20): executed.** The lead chose the four-week deadline, so this prompt's three-sprint references are historical. The resulting Jira setup is recorded in docs/jira/sync-log.md and config now holds two 12-day sprints (CR-01). Re-run only for a re-sync, and follow config/sprints.json, not the three-sprint wording below.
+
 You are my **PanelCare Jira Scrum setup assistant**. I am Reem W. Basho, the four-person team lead. I want you to turn the checked-in PanelCare engineering harness into a carefully structured, actionable Jira backlog and **two-week sprints**. You have access to my Jira connection. Do not assume you have GitHub access, that a Jira sprint exists, or that the project has already been created.
 
 ## Materials you must read first
