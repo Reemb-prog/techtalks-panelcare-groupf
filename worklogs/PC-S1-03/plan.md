@@ -2,7 +2,8 @@
 
 Sprint: S1 | Owner: rand | Reviewer: reem
 Jira key: KAN-15 | Draft PR: TO CONFIRM | Planned start D1 (2026-11-20), review-ready day: D4 (2026-11-23)
-Plan review: Pending (decision-level task per D11: contract + recurrence, human approval required before coding) | Approver: Reem (lead) | Date: TO CONFIRM
+Plan review: Approved (decision-level task per D11) | Approver: Reem (lead), plan PR merged as b1d8433 | Date: 2026-11-20
+Lead answers: Q2–Q7 approved as written (D05: Asia/Beirut, month-end clamp from original anchor, [today, today+90)). Q1: Reem asked for zod to be added in this PR; config/work-items.json must allow package.json/package-lock.json for PC-S1-03 (lead change requested) or `harness check` fails.
 
 ## Goal and scope
 Freeze the typed data/API contract that every S1 screen builds against and every S2 handler implements:
@@ -129,8 +130,24 @@ Planned test files in `src/lib/__tests__/`:
 
 Commands to run before PR: `npm ci`, `npm run lint`, `npm run typecheck`, `npm run test`, `npm run build`, `node scripts/harness.mjs check`, `node scripts/ci.mjs`.
 
-Actual commands, date, environment and result (Passed/Failed/Not run/Blocked): NOT RUN
-Screenshot/log link: NOT CAPTURED
+Actual commands, date, environment and result (Passed/Failed/Not run/Blocked), 2026-11-20, Windows 11, Node 24.21.0, npm 11.19.0:
+* `npm run lint`: Passed (0 problems)
+* `npm run typecheck`: Passed (includes the Zod ↔ DTO type-equality checks)
+* `npm run test`: Passed, 7 files / 90 tests (89 new: recurrence 15, job-status 10, validations 16, fixtures 6, contract-types 3, mock-adapters 39)
+* `npm run build`: Passed
+* `node scripts/ci.mjs`: Passed (harness validate, lint, typecheck, test, build)
+* `node scripts/harness.mjs check`: **Failed (expected, Blocked on lead config change)**. Only `package.json` and `package-lock.json` are out of scope; adding zod there was requested by Reem. Needs PC-S1-03 paths + `dependsOn: ["PC-S1-01"]` in config/work-items.json on main.
+* Not covered: browser E2E, database, storage (none exist in S1).
+Screenshot/log link: n/a (no UI); test output above.
+
+## Deviations from the approved plan (for reviewer attention)
+* **Zod 4.6.7** (current stable) instead of v3; same API surface for our use.
+* **Measurements** are `number` checklist items whose unit comes from the template, instead of a separate `measurements` field (one validation path, simpler report).
+* **Three routes added** to CONTRACTS.md (marked "added in PC-S1-03"): `GET /api/technicians` (assignment picker), `POST /api/photos` (photo metadata before completion), `GET /api/checklist-template`.
+* **Cancel releases the technician** so a cancelled occurrence can later be reactivated (reactivation requires unassigned).
+* **Date helpers** live in `src/lib/validations/dates.ts` (shared by validation and recurrence); recurrence itself is where Q6 said.
+* **Relative imports** inside src/lib: `vitest.config.ts` (PC-S1-01) has no `@/` alias, so `@/` imports fail in tests. Screens can still use `@/types` etc. (Next.js resolves it). Reported to Reem; a one-line alias fix belongs to a lead PR.
+* **package-lock.json** also gained a few optional `@tailwindcss/oxide-wasm32-wasi` entries: npm 11 normalisation vs the npm 10 lockfile. No version changes besides zod.
 
 ## Risk, security and UX review
 * **Q1 Zod blocker:** if unanswered by D2, start with types, recurrence and the status machine (no Zod needed) and add validations once installed.
@@ -143,4 +160,10 @@ Screenshot/log link: NOT CAPTURED
 * Impeccable: n/a (no UI in this task).
 
 ## Handoff
-Status: Planned, awaiting Reem's plan approval and answers to Q1–Q7 | Files changed: worklogs/PC-S1-03/plan.md | Next step: Reem reviews plan in Jira KAN-15; Rand runs `npm ci`
+Status: Implemented, draft PR | Files changed: package.json, package-lock.json (zod), docs/CONTRACTS.md, src/types/*, src/lib/validations/*, src/lib/adapters/** (mock + recurrence), src/lib/fixtures/*, src/lib/__tests__/*, this worklog | Next step: Reem merges the config path change; rerun `harness check`; mark PR ready for review by D4 (2026-11-23).
+
+Notes for the lead (outside this task's scope, not changed here):
+* config/work-items.json: allow package.json/package-lock.json for PC-S1-03 and add dependsOn PC-S1-01 (otherwise validate reports a parallel path overlap).
+* vitest.config.ts: add the `@/` → `src/` alias so teammates' tests can use the same imports as their components.
+* progress.md and session-handoff.md still describe the pre-Jira S0 state.
+* For teammates: start with `createMockAdapters()` from `src/lib/adapters`, types from `@/types`, form schemas from `src/lib/validations`; checklist content placeholder waits for PC-S1-04.
