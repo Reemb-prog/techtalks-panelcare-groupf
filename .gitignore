@@ -14,3 +14,6 @@ playwright-report/
 *.log
 supabase/.branches/
 supabase/.temp/
+
+# Next.js generated types
+next-env.d.ts

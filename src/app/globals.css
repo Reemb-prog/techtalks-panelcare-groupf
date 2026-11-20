@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+/* Base reset only. Design tokens live in src/styles/ (PC-S1-02) and are wired in by PC-S1-05. */
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
