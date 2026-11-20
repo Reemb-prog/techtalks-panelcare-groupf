@@ -1,59 +1,71 @@
 # Roadmap, stage gates and PR timing
 
-This is a **three-sprint, six-week recommendation** with two-week sprints, ten planned working days each (Monday to Friday in the draft dates). Exact calendar dates are proposals: confirm the official academic deadline, local holidays and team availability before activating Sprint 1. Keep the sprints two weeks each if dates change.
+This is the **approved four-week plan** (D03, CR-01 in [DECISIONS.md](DECISIONS.md), lead-approved 2026-11-20): two sprints of **12 calendar days each, weekends included**, mirroring Jira project KAN (sprint IDs 1 and 2). D1 is the sprint's start date. Day numbers below match \`startDay\`/\`prDay\` in [config/work-items.json](../config/work-items.json), which is authoritative if the two ever disagree. The earlier three-sprint, six-week plan (Nov 23–Jan 3) was not adopted.
 
-## Stage 0, before the sprint clock: baseline and Jira (November 19–22, proposed)
+## Stage 0, before the sprint clock: baseline and Jira (done 2026-11-20)
 
-**Why:** Prevent four developers from building conflicting abstractions. Reem reviews requirements, unresolved business decisions, API DTOs and work-item ownership. Establish GitHub repository, Jira Scrum board and access, no paid provider setup. Confirm design references and delivery date.
+**Why:** Prevent four developers from building conflicting abstractions. Jira backlog, sprints, blockers and the harness config were created and reconciled (see [docs/jira/sync-log.md](jira/sync-log.md)).
 
-**Gate:** four developers have access, business decisions assigned to a human, Jira work items are de-duplicated, product and API outline approved. Only then start S1. Stage 0 is planning, not a stealth fourth development sprint.
+**Gate before S1 work:** four developers have access, the lead starts Sprint 1 in Jira (automation never does), and D05/D06/D07 owners are known. Stage 0 is planning, not a stealth development sprint.
 
-## Sprint 1, UX and mock frontend: November 23–December 6
+## Sprint 1, UX and mock frontend: November 20–December 1
 
-**D1:** Sprint planning and board commitment; Reem starts base scaffold branch; Mahdi collects visual references, IA and wireframes; Rand specifies entity/endpoint contracts; Tarek maps technician flow. **D2 PR:** app skeleton and CI, reviewed by Rand, merged early so others can branch from updated main.
+**D1–D2:** Reem scaffolds the app and CI (PC-S1-01, **PR D2**), reviewed by Rand and merged early so others branch from updated main. In parallel from D1: Mahdi on design discovery and tokens (PC-S1-02), Rand on typed contracts and mocks (PC-S1-03), Tarek on the technician flow map (PC-S1-04).
 
-**D3 PRs:** design blueprint/tokens, typed contracts/mocks and technician wireframes; Reem performs design and API reviews. No full screen work before these approvals.
+**D4 PRs:** design blueprint/tokens, contracts/mocks and technician design docs. Reem performs design and API reviews. No full screen work before these approvals.
 
-**D4–D5:** each developer branches **from updated main** for assigned UI package. **D5 PR:** shell and simulated login, reviewed by Mahdi. Team checks desktop/mobile navigation.
+**D5–D6:** each developer branches **from updated main** for their UI package. Reem builds the coordinator shell and mock login and wires the PC-S1-02 tokens into \`src/app/globals.css\` (PC-S1-05, **PR D6**, reviewed by Mahdi).
 
-**D6–D8:** registry by Mahdi, maintenance/dispatch by Rand, technician pages by Tarek. Each raises draft PR by D6, **review-ready PR by D8**. Include screenshots at 375, 768 and 1440 pixels, states, keyboard testing and Impeccable audit.
+**D5–D10:** registry screens by Mahdi (PC-S1-06), maintenance/dispatch mock by Rand (PC-S1-07), technician mobile UI by Tarek (PC-S1-08). Draft PR within a day of starting; **review-ready PR by D10** with screenshots at 375, 768 and 1440 px, states, keyboard testing and Impeccable critique.
 
-**D9:** integration review and visual polish, fix accessibility and conflicting behaviors. **D10 PR:** Reem posts S1 UX signoff and frozen contracts; sprint demo and retrospective. Do not claim backend is built.
+**D11–D12:** integration review and polish. **D12 PR:** Reem posts S1 UX signoff and frozen contracts (PC-S1-09); sprint demo and retrospective. Do not claim backend is built.
 
-**Exit:** complete mock-driven coordinator/technician journeys are navigable, responsive, meaningfully designed and approved; all user-facing actions have a real mocked response, no decorative dead buttons. Contract definitions and unresolved business questions recorded.
+**Exit:** complete mock-driven coordinator/technician journeys are navigable, responsive and approved; every user-facing action has a real mocked response; contracts frozen; unresolved business questions recorded.
 
-## Sprint 2, independent backend: December 7–20
+## Sprint 2, backend, integration and demo: December 2–13
 
-**D1–D4:** Rand migrates schema, constraints, RLS and local seed. Others prepare isolated test plans and read-only API contract reviews while blocked. **D4 PR:** schema/policy foundation, reviewed by Reem with negative authorization tests.
+S2 combines the original S2 (backend) and S3 (integration and release) work. Each owner connects real services to **their own** screens (PC-S3-01..04 absorbed into PC-S2-02, 03, 06, 07).
 
-**D5–D8:** Reem finishes real auth and then builds plan API, Mahdi builds registry and dispatch API, Tarek builds inspection/report/storage, Rand builds scheduler against approved schema and contract without waiting for the plan API implementation. **D6 PR:** auth. **D7 PR:** registry. **D8 PR:** plan API. Use **draft PRs earlier** and short review cycles to catch contract drift before integration.
+**D1–D5:** Rand builds schema, constraints, RLS and seed (PC-S2-01, **PR D5**) and publishes a **frozen schema list by D2** (\`docs/data/schema-freeze.md\`).
 
-**D9 PRs:** transactional scheduler, dispatch and inspection/report services; demonstrate replay and role-denial tests. **D10 PR:** backend gate evidence, database reset/seed reproducibility and updated contract table.
+**D3 early starts:** Reem (auth, PC-S2-02), Mahdi (registry, PC-S2-03) and Tarek (inspections/reports, PC-S2-07) build handlers, validation and unit tests against the frozen PC-S1-03 contract and the D2 schema freeze. Database-backed integration tests wait until PC-S2-01 merges.
 
-**Exit:** backend independently tested against actual local/isolated Supabase, including concurrency, policies, invalid inputs, migrations and private photo storage. UI is **still on mocks** until S3.
+**PR checkpoints:**
 
-## Sprint 3, full integration and release: December 21–January 3
+| Day | PR | Owner |
+| --- | --- | --- |
+| D5 | Schema, RLS, seed (PC-S2-01) | Rand |
+| D6 | Auth and live login wiring (PC-S2-02) | Reem |
+| D7 | Registry APIs and live screens (PC-S2-03) | Mahdi |
+| D7 | Plan APIs, reduced (PC-S2-04) | Reem |
+| D9 | Inspections, reports, live technician flow (PC-S2-07) | Tarek |
+| D10 | 90-day scheduler with golden-date tests (PC-S2-05) | Rand |
+| D10 | Dispatch APIs and live planner wiring on seeded jobs (PC-S2-06) | Mahdi |
+| D11 | Cross-role E2E smoke, reduced (PC-S3-07) | Tarek |
+| D11 | Vercel/Supabase demo with rollback, reduced (PC-S3-08) | Reem |
+| D12 | Backend gate, final acceptance and release signoff (PC-S3-09) | Reem |
 
-**D1–D3 PR:** real login, register/session flows, coordinate stable staging environment. **D4 PR:** live registry forms. **D5 PRs:** real scheduler/dispatch and technician/report UI.
+**Critical path:** PC-S2-03 → PC-S2-06 (Mahdi) leaves about 2 days of slack. If PC-S2-03 slips past D7, raise it at standup and cut UI polish first. Photo upload in PC-S2-07 is a stretch goal: if it's not review-ready by D10, reports ship without photos by lead decision.
 
-**D6–D7:** live dashboard/warranty indicator, complete cross-role test, real phone-size field walkthrough, user feedback; Impeccable critique and repair. Staging deployment uses only approved synthetic fixtures, not production identities.
+**Deployment:** one noncommercial demo environment, isolated synthetic data only. Reem deploys **only after explicit human authorization** and confirmed secure settings.
 
-**D8 PRs:** scheduler stress/concurrency evidence, Playwright workflow, accessibility/visual regression. **D9 PR:** controlled Vercel+Supabase release preparation, migration rehearsal and rollback. Reem deploys production **only after human authorization** and secure settings confirmed.
+**Exit:** reproducible migrations, permission denials, idempotent 90-day recurrence, the core coordinator → technician → report journey passing against the real backend, a deployed demo with documented rollback, and explicit release signoff.
 
-**D10 PR:** release evidence, final P0 demo, handoff, sprint review, retrospective and Git tag. Fault tickets are not allowed to displace P0 tests.
+## Deferred past December 13 (backlog, not scheduled)
 
-**Exit:** real end-to-end workflow, two-role permission tests, operational and security checks, deployed noncommercial demo if eligible, rollback plan and explicit signoff.
+* PC-S3-05 live dashboard and warranty visibility (the dashboard stays clearly labelled mock).
+* PC-S3-06 scheduler stress timing and migration rehearsal (golden-date tests moved into PC-S2-05).
+* From reduced items: plan edit-conflict and schedule-revision rules (PC-S2-04); full accessibility/Impeccable audit and user validation (PC-S3-07); separate staging environment (PC-S3-08).
+* P1 fault tickets stay frozen until P0 is demonstrably done.
 
-## Four-week deadline fallback
-
-The earlier PDF estimated November 16–December 13 (roughly four weeks). If that is binding, the three-sprint roadmap is infeasible as written. **Do not move S3 work into S1 without disclosure.** A defensible contingency is two two-week sprints: S1 mock UX + contracts + scaffold; S2 minimum backend, thin integration and acceptance, with more parallelism and much less contingency. Freeze P1 entirely, reduce UI scope to the essential customer → report journey, and treat supplier photo uploads/advanced reports and full visual polish as explicit risk items. Require lead approval of the reduced scope, PR calendar and risk acceptance. Do not silently label the six-week plan a four-week delivery.
+Deferred items cannot be started with \`harness start\` until the lead re-plans them in Jira and config.
 
 ## Agile operating rhythm
 
-Daily 15-minute standup: yesterday, today, blocker, PR review requested. Reem updates Jira statuses and dependency links. Wednesday: design/API review and PR integration. Every Friday: working demo, regression test review and short retro. Sprint review and retrospective on D10; incomplete tasks return to backlog or get re-estimated, never auto-marked done.
+Daily 15-minute standup: yesterday, today, blocker, PR review requested. Reem updates Jira statuses and dependency links. Mid-sprint (around D6): design/API review and PR integration. Sprint review and retrospective on D12; incomplete tasks return to backlog or get re-estimated, never auto-marked done. S2 is 37 points against roughly 32 points of capacity: re-estimate at S2 planning.
 
-**Pull request checkpoints:** open a **draft** once the first thin vertical slice works, normally within 24 hours of starting; mark review-ready by the task's \`prDay\`; expect review within one workday; merge only after checks and at least one non-author human approval (enforce technically only if the GitHub plan/repo visibility allows). No 500-file end-of-sprint PRs.
+**Pull request checkpoints:** open a **draft** once the first thin vertical slice works, normally within 24 hours of starting; mark review-ready by the task's \`prDay\`; expect review within one day; merge only after checks and at least one non-author human approval. No 500-file end-of-sprint PRs.
 
 ## Work item sizing and coupling
 
-The [machine-readable work list](../config/work-items.json) contains stable IDs, owner, reviewer, dependencies, paths, estimates, first planned day and PR day. Planned points are relative team estimates **not guaranteed hours or equal individual workloads**. Re-estimate in Jira during planning. Blockers are real: when backend base is delayed, do not build against imaginary tables.
+The [machine-readable work list](../config/work-items.json) contains stable IDs, Jira keys, owner, reviewer, dependencies, paths, estimates, start day and PR day. \`node scripts/harness.mjs validate\` rejects parallel tasks that own the same files. Planned points are relative team estimates, **not guaranteed hours or equal individual workloads**. Blockers are real: when the backend base is delayed, build only against the frozen contract and schema list, never imaginary tables.
