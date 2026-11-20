@@ -45,8 +45,8 @@
     "points": 3,
     "startDay": 1,
     "prDay": 4,
-    "dependsOn": [],
-    "paths": ["docs/CONTRACTS.md","src/types/","src/lib/adapters/","src/lib/fixtures/","src/lib/validations/","src/lib/__tests__/"],
+    "dependsOn": ["PC-S1-01"],
+    "paths": ["docs/CONTRACTS.md","src/types/","src/lib/adapters/","src/lib/fixtures/","src/lib/validations/","src/lib/__tests__/","package.json","package-lock.json"],
     "acceptance": ["Type all MVP entities and API request/response envelopes","Provide pure mock adapters with delay, empty, error and permission-denied variants","Specify scheduler recurrence and job status transitions, agreed by lead","Contract-level unit tests distinguish mocks from persistence"],
     "test": "npm run test; API contract review",
     "planChange": "Unchanged scope; days rescaled to the 12-day calendar sprint."
