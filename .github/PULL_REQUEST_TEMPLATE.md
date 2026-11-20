@@ -36,7 +36,7 @@ Result and follow-up:
 
 Checklist:
 
-* [ ] Approved plan before code
+* [ ] Plan written before code (human-approved if decision-level, per D11)
 * [ ] Work within allowed paths and acceptance tests
 * [ ] Actual checks passed or explicitly marked Blocked
 * [ ] No secrets/PII/unlicensed imagery

@@ -25,7 +25,7 @@ node scripts/harness.mjs start PC-S1-06
 node scripts/harness.mjs plan
 \`\`\`
 
-Claude reads the current worklog plan, asks for plan review, implements only after approval, then:
+Claude reads the current worklog plan and completes it. Routine tasks: record the plan as self-approved and implement. Tasks touching contracts, schema/RLS, auth/roles, recurrence, design system, provider, spend, deployment or shared files: get a human plan approval first (tiers in CLAUDE.md, D11). Then:
 
 \`\`\`bash
 node scripts/harness.mjs check
@@ -48,7 +48,7 @@ Open a PR targeting **main**, mention both local ID and **actual Jira key**, att
 
 ## Practical workflow
 
-1. Jira To Do → branch start; plan written and approved.
+1. Jira To Do → branch start; plan written (and approved by a human when the task needs it, per D11).
 2. Jira In Progress → implementation, tests, self-review and a draft PR.
 3. Jira In Review → reviewer checks diff, scope, design, negative tests and PR evidence.
 4. Jira Testing → merged to main, integration regression and preview validated.
