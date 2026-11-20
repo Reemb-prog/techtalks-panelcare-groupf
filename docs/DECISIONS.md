@@ -41,6 +41,7 @@ Do not overwrite history or mark unexecuted tests as passed. For minor copy/UI s
   * PC-S1-02 excludes the PC-S1-04 technician design docs.
   * PC-S2-01 publishes a D2 schema freeze, so PC-S2-02, PC-S2-03 and PC-S2-07 can start on D3 against the frozen contract.
   * PC-S2-06 develops against seeded jobs and no longer depends on PC-S2-05; it is flagged as critical-path risk.
+  * Its absorbed check "repeated generation creates zero duplicates" moves to PC-S3-07 (D10–D11), to be checked once PC-S2-05 (PR D10) has merged.
   * PC-S3-07, PC-S3-08 and PC-S3-09 have narrowed doc paths.
 * **Affected:** config/sprints.json, config/work-items.json, scripts/harness.mjs (deferred items, calendar days, Jira keys, excludePaths, parallel path-overlap check), and the Jira descriptions, dates and links of the changed items.
 * **Rollback:** revert the implementing PR. Jira state is recorded in docs/jira/sync-log.md.

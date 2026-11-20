@@ -254,7 +254,7 @@
     "prDay": 10,
     "dependsOn": ["PC-S2-01","PC-S2-03","PC-S2-04"],
     "paths": ["src/app/api/jobs/","src/lib/services/dispatch/","src/__tests__/dispatch/","src/features/maintenance/","src/features/dispatch/","src/lib/adapters/maintenance/","src/lib/adapters/dispatch/"],
-    "acceptance": ["Coordinator can assign and reschedule permitted future jobs","Technician sees assigned subset only and cannot self-assign","State transitions and conflicting updates return correct error semantics","Plan saves, 90-day generation, pause/resume, assignments and status persist across sessions","Preview uses same recurrence policy as backend and displays conflict outcomes","Repeated generation creates zero duplicates in the real backend","Develop and test against seeded jobs from the PC-S2-01 seed; does not wait for the PC-S2-05 recurrence generator (generator-created jobs are verified in PC-S3-07)"],
+    "acceptance": ["Coordinator can assign and reschedule permitted future jobs","Technician sees assigned subset only and cannot self-assign","State transitions and conflicting updates return correct error semantics","Plan saves, 90-day generation, pause/resume, assignments and status persist across sessions","Preview uses same recurrence policy as backend and displays conflict outcomes","Develop and test against seeded jobs from the PC-S2-01 seed; does not wait for the PC-S2-05 recurrence generator (generator-created jobs are verified in PC-S3-07)"],
     "test": "Cross-role job API integration tests; Live-plan and duplicate-playwright checks with isolated fixtures",
     "absorbs": ["PC-S3-03"],
     "risk": "Critical path: about 2 days of slack (PR D10, sprint ends D12). If PC-S2-03 slips past D7, raise it at standup and cut UI polish first.",
@@ -291,7 +291,7 @@
     "prDay": 11,
     "dependsOn": ["PC-S2-02","PC-S2-03","PC-S2-06","PC-S2-07"],
     "paths": ["e2e/","docs/test-results/e2e.md"],
-    "acceptance": ["End-to-end coordinator → technician → report scenario passes with real test accounts","Smoke outcome recorded in docs/test-results/e2e.md exactly as run (Passed/Failed/Blocked), including one technician permission-denied check"],
+    "acceptance": ["End-to-end coordinator → technician → report scenario passes with real test accounts","Repeated recurrence generation (PC-S2-05) creates zero duplicate jobs in the real backend (moved from PC-S2-06, CR-01)","Smoke outcome recorded in docs/test-results/e2e.md exactly as run (Passed/Failed/Blocked), including one technician permission-denied check"],
     "test": "Playwright, axe-style accessible checks and supervised user walkthrough",
     "deferredScope": ["Mobile, keyboard, contrast, responsive and Impeccable audits documented","Capture feedback from installers/technician/owners where available; separate observed from planned validation"],
     "planChange": "Reduced and moved into S2: full accessibility/Impeccable audit and user validation deferred."
