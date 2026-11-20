@@ -12,6 +12,7 @@
 | D08 | Vercel Hobby only for personal noncommercial demonstration; free tier terms | Conditional | Reem, before deployment |
 | D09 | Pinterest for visual discovery; only licensed source images shipped | Approved safety policy | All UI authors |
 | D10 | Human PR approval, with GitHub Free private limitations | Proposed team policy | Reem, S0 |
+| D11 | Tiered plan approval: routine tasks self-approve their written plan (non-author PR review is the gate); contract, schema/RLS, auth/roles, recurrence, design system, provider, spend, deployment and shared-file tasks need human plan approval before coding | Approved 2026-11-20 | Reem |
 
 ## Critical change process
 

@@ -192,7 +192,7 @@ function writePlan() {
     '## Handoff', 'Status: Planned | Files changed: none | Next step: obtain plan review', ''
   ].join('\n');
   fs.writeFileSync(target, contents);
-  console.log('Created ' + path.relative(root, target) + '. Human approval required before implementation.');
+  console.log('Created ' + path.relative(root, target) + '. Complete it; human approval is required before coding only for decision-level tasks (CLAUDE.md, D11).');
 }
 function status() {
   const branch = currentBranch();

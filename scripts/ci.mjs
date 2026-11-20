@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 function execute(executable, args) {
   console.log('\nRUN: ' + executable + ' ' + args.join(' '));
-  execFileSync(executable, args, { cwd: root, stdio: 'inherit', env: { ...process.env, CI: 'true' } });
+  execFileSync(executable, args, { cwd: root, stdio: 'inherit', env: { ...process.env, CI: 'true' }, shell: process.platform === 'win32' && executable === 'npm' });
 }
 try {
   execute(process.execPath, ['scripts/harness.mjs', 'validate']);

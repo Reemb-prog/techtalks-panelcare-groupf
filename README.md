@@ -27,7 +27,7 @@ This repository starts with the **harness, not a fabricated application**. Four 
    node scripts/harness.mjs status
    \`\`\`
 
-6. Write the task plan, request the plan/design review, implement only after approval, test, and open a PR. Consult [docs/TEAM_BRANCHES.md](docs/TEAM_BRANCHES.md) for daily Git commands.
+6. Write the task plan (request plan/design review only for decision-level tasks, per CLAUDE.md), implement, test, and open a PR. Consult [docs/TEAM_BRANCHES.md](docs/TEAM_BRANCHES.md) for daily Git commands.
 
 ## How the harness controls work
 
