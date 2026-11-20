@@ -46,7 +46,7 @@ Initialize Next.js and repository quality gates
 
 ## Tests and evidence
 Intended: npm run lint; npm run typecheck; npm run test; npm run build
-Actual (2026-11-20, Windows 11, Node 23.1.0, npm 10.9.1): npm run lint Passed; npm run typecheck Passed; npm run test Passed (1 test); npm run build Passed; npm run e2e Passed (2: desktop + mobile, local Chromium); node scripts/harness.mjs check Passed (17 paths in scope); node scripts/ci.mjs FAILED locally: harness validate passed, then "spawnSync npm ENOENT" (ci.mjs calls npm without a shell, which does not resolve npm.cmd on Windows; harness bug outside this task, reported to lead). The same lint/typecheck/test/build steps pass when run directly (above). Expected to work on the Linux GitHub runner. GitHub Actions: Not run yet (runs on the PR).
+Actual (2026-11-20, Windows 11, Node 23.1.0, npm 10.9.1): npm run lint Passed; npm run typecheck Passed; npm run test Passed (1 test); npm run build Passed; npm run e2e Passed (2: desktop + mobile, local Chromium); node scripts/harness.mjs check Passed (17 paths in scope); node scripts/ci.mjs FAILED locally: harness validate passed, then "spawnSync npm ENOENT" (ci.mjs calls npm without a shell, which does not resolve npm.cmd on Windows; harness bug outside this task; fixed in PR #6 on lead/config, where ci.mjs then passed against this scaffold: lint, typecheck, test, build). The same lint/typecheck/test/build steps pass when run directly (above). Expected to work on the Linux GitHub runner. GitHub Actions: Not run yet (runs on the PR).
 Screenshot/log link: NOT CAPTURED
 
 ## Risk, security and UX review
