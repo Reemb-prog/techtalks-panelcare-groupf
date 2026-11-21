@@ -9,8 +9,20 @@ You are working as **one developer assistant on one assigned task branch** in a 
 3. If on \`main\`, make no feature edits. Ask the developer to select an approved Jira task and run \`node scripts/harness.mjs start <LOCAL_ID>\`. Never reuse another member's branch. Never push to main directly.
 4. Run \`node scripts/harness.mjs plan\` if the branch does not yet have a plan. Before coding, complete \`worklogs/<LOCAL_ID>/plan.md\`: intended result, files and contracts, UX sections/images if relevant, edge cases, tests, security, risk and reviewer. **Planning precedes implementation, for every phase and work item.** Plan approval is tiered (D11): for a routine task inside its own allowed paths, the owner records the plan as self-approved and proceeds; the non-author PR review is the gate. A separate human plan approval (Reem, or a non-author for Reem's own work) is required before coding when the task touches an API contract, schema/migrations/RLS, auth or role model, recurrence policy, design system/tokens, provider, spend, deployment/release or shared files.
 5. Implement only the assigned task and allowed file areas. If shared files, migrations, contracts, design tokens or architecture must change, stop and coordinate a separate lead-owned PR and assess downstream impact.
-6. Verify honestly: \`node scripts/harness.mjs check\` then \`node scripts/ci.mjs\`. For UI, manually inspect desktop/mobile and run the Impeccable critique/audit once installed; for backend, independently prove authorization, validations, scheduler and persistence behaviors. Do not call mocked UI a real backend.
-7. Update only your own \`worklogs/<LOCAL_ID>/plan.md\` with tests actually run, status and handoff. Create PR using the template. Only after review and merged evidence should Jira move to Done. The team lead updates shared \`progress.md\`, \`session-handoff.md\`, roadmap gates and any global work-item revisions in an integration PR.
+6. **Write tests with the code, never after.** Follow [docs/TESTING.md](docs/TESTING.md) (D12): lowest layer that catches the bug (unit, integration, E2E), covering the happy, misuse and error paths that apply, without overtesting. After each change run only affected tests: \`node scripts/harness.mjs test\`. Before review, once: \`node scripts/harness.mjs check\` then \`node scripts/ci.mjs\`. For UI, manually inspect desktop/mobile and run the Impeccable critique/audit once installed; for backend, independently prove authorization, validations, scheduler and persistence behaviors. Do not call mocked UI a real backend.
+7. Update only your own \`worklogs/<LOCAL_ID>/plan.md\` with tests actually run, status, review guide and handoff. Create PR using the template. Only after review and merged evidence should Jira move to Done. The team lead updates shared \`progress.md\`, \`session-handoff.md\`, roadmap gates and any global work-item revisions in an integration PR.
+8. **End every run with a review guide** (below). Developers rarely edit by hand; they review your changes in the chat, so tell them exactly what to look at and what only they can do.
+
+## End-of-run review guide (every run that changed files)
+
+Developers work through Claude Code or Codex chats and review as you go. Close each run with these short sections, in plain language, and copy the last two into the worklog's "Developer review guide":
+
+1. **What I changed and why**: each file (as a clickable link) with one line on the change. Mention anything deliberately not done.
+2. **Tests**: tests added per layer and which paths they cover (happy / misuse / error); the commands actually run and their results. Say plainly what was not run and why.
+3. **Review these first**: at most five \`file:line\` spots where a human judgment matters most (security or role checks, contract shapes, tricky logic, assumptions you made, UI states to eyeball), each with what to check.
+4. **You need to do or decide**: only what the assistant cannot: approvals, Jira moves, real screenshots at 375/768/1440, manual browser or device checks, credentials, choices between options. Name the file or field to fill when there is one.
+
+Keep it scannable; no restating of the diff line by line.
 
 ## Invariants
 
@@ -25,4 +37,4 @@ You are working as **one developer assistant on one assigned task branch** in a 
 * Pinterest is a design-discovery source, **not an automatic image license**. Use only images whose publishing rights are verified and recorded in \`assets/image-manifest.csv\`.
 * Each PR has one non-author human reviewer; Reem also approves architecture/security changes, and someone else reviews Reem's PRs. A Claude review is supplemental.
 
-See [docs/TEAM_BRANCHES.md](docs/TEAM_BRANCHES.md) for commands, [docs/DESIGN_BLUEPRINT.md](docs/DESIGN_BLUEPRINT.md) for frontend guidance, [docs/CONTRACTS.md](docs/CONTRACTS.md) for invariants and [docs/QUALITY_SECURITY.md](docs/QUALITY_SECURITY.md) for exit criteria.
+See [docs/TEAM_BRANCHES.md](docs/TEAM_BRANCHES.md) for commands, [docs/DESIGN_BLUEPRINT.md](docs/DESIGN_BLUEPRINT.md) for frontend guidance, [docs/CONTRACTS.md](docs/CONTRACTS.md) for invariants, [docs/TESTING.md](docs/TESTING.md) for what and how much to test, and [docs/QUALITY_SECURITY.md](docs/QUALITY_SECURITY.md) for exit criteria.

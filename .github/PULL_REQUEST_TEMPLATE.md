@@ -15,7 +15,14 @@ Link worklogs/PC-SN-XX/plan.md, approved design/contract, merged dependency PRs 
 
 ## Test evidence (do not claim unexecuted checks)
 
-Commands, environment and exact result for lint / TypeScript / tests / build:
+Tests added (docs/TESTING.md), per layer and paths covered (happy / misuse / error):
+
+* Unit:
+* Integration:
+* E2E:
+* Test exemption, if any, and why:
+
+Commands, environment and exact result for lint / TypeScript / tests / build (full `node scripts/ci.mjs` run):
 
 Manual desktop/mobile or Impeccable critique output and screenshots for UI:
 
@@ -29,6 +36,10 @@ Empty/loading/error/denied/retry/concurrency:
 
 Migration or rollback impact:
 
+## Where to look first
+
+The few file:line spots that need human judgment (from the worklog's Developer review guide):
+
 ## Human reviewer
 
 Reviewer name (must not be author):
@@ -38,6 +49,7 @@ Checklist:
 
 * [ ] Plan written before code (human-approved if decision-level, per D11)
 * [ ] Work within allowed paths and acceptance tests
+* [ ] Tests added for every behavior change (happy/misuse/error where relevant), without duplicate or snapshot-heavy tests
 * [ ] Actual checks passed or explicitly marked Blocked
 * [ ] No secrets/PII/unlicensed imagery
 * [ ] Jira linked, reviewer requested, evidence captured

@@ -25,7 +25,7 @@ node scripts/harness.mjs start PC-S1-06
 node scripts/harness.mjs plan
 \`\`\`
 
-Claude reads the current worklog plan and completes it. Routine tasks: record the plan as self-approved and implement. Tasks touching contracts, schema/RLS, auth/roles, recurrence, design system, provider, spend, deployment or shared files: get a human plan approval first (tiers in CLAUDE.md, D11). Then:
+Claude reads the current worklog plan and completes it, including the tests it will write (docs/TESTING.md). Routine tasks: record the plan as self-approved and implement. Tasks touching contracts, schema/RLS, auth/roles, recurrence, design system, provider, spend, deployment or shared files: get a human plan approval first (tiers in CLAUDE.md, D11). While implementing, Claude writes tests with each change and runs only the affected ones (\`node scripts/harness.mjs test\`; add \`--no-e2e\` while iterating on UI). After each run it gives a review guide: what changed, tests run, the spots to review first and what you must do. Review in the chat; you rarely need to edit by hand. Before review:
 
 \`\`\`bash
 node scripts/harness.mjs check

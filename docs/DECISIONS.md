@@ -13,6 +13,7 @@
 | D09 | Pinterest for visual discovery; only licensed source images shipped | Approved safety policy | All UI authors |
 | D10 | Human PR approval, with GitHub Free private limitations | Proposed team policy | Reem, S0 |
 | D11 | Tiered plan approval: routine tasks self-approve their written plan (non-author PR review is the gate); contract, schema/RLS, auth/roles, recurrence, design system, provider, spend, deployment and shared-file tasks need human plan approval before coding | Approved 2026-11-20 | Reem |
+| D12 | Testing and review policy: every behavior change ships with tests at the lowest useful layer (unit, integration, E2E) covering happy, misuse and error paths without overtesting; iterate with affected-only tests, full suite once before review; every assistant run ends with a developer review guide (docs/TESTING.md, CLAUDE.md) | Approved 2026-11-21 | Reem |
 
 ## Critical change process
 
