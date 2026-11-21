@@ -2,6 +2,8 @@
 
 ## Test layers per sprint
 
+What each change must test, how much, and how to run only affected tests: [TESTING.md](TESTING.md) (D12). The table below is the sprint-level view.
+
 Under the approved four-week plan (CR-01), S2 covers both the backend and the integrated columns: each owner proves their backend independently, then wires their own screens. Items deferred past Dec 13 (full audit, stress timing, user validation) are noted per item in config/work-items.json.
 
 | Layer | S1 mock UX | S2 backend | S2 integrated |
@@ -23,7 +25,9 @@ Recommended package.json scripts added by PC-S1-01:
 * \`typecheck\`: tsc --noEmit
 * \`test\`: vitest run
 * \`build\`: next build
-* \`test:e2e\`: playwright test, run separately after Playwright browser setup and application/test-data start.
+* \`e2e\`: playwright test, run separately after Playwright browser setup (\`npx playwright install chromium\`).
+
+While iterating, \`node scripts/harness.mjs test\` runs only the Vitest and Playwright tests the branch's changes can affect. \`node scripts/ci.mjs\` runs the full suite once before review, and CI repeats it on the PR.
 
 CI runs harness validation and app checks on PRs. Tests with Postgres and storage must use a local Supabase instance or an explicitly isolated nonproduction project, never a production database reset.
 
@@ -41,7 +45,7 @@ CI runs harness validation and app checks on PRs. Tests with Postgres and storag
 
 1. The work-item plan and dependency signoff exist.
 2. Functionality meets every criterion plus failed/empty/denied states.
-3. Lint, TypeScript, unit/contract tests and build **actually run**; live tests used where required.
+3. Tests added with the change per TESTING.md; lint, TypeScript, unit/contract tests and build **actually run**; live tests used where required.
 4. Relevant desktop/mobile and accessibility checks performed, with screenshots or recorded observations.
 5. Security and data isolation checks pass or an explicit blocker is recorded.
 6. Scope checker passes, docs and local handoff updated.

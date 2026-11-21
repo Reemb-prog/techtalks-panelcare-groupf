@@ -25,7 +25,7 @@ node scripts/harness.mjs start PC-S1-06
 node scripts/harness.mjs plan
 \`\`\`
 
-Claude reads the current worklog plan and completes it. Routine tasks: record the plan as self-approved and implement. Tasks touching contracts, schema/RLS, auth/roles, recurrence, design system, provider, spend, deployment or shared files: get a human plan approval first (tiers in CLAUDE.md, D11). Then:
+Claude reads the current worklog plan and completes it, including the tests it will write (docs/TESTING.md). Routine tasks: record the plan as self-approved and implement. Tasks touching contracts, schema/RLS, auth/roles, recurrence, design system, provider, spend, deployment or shared files: get a human plan approval first (tiers in CLAUDE.md, D11). While implementing, Claude writes tests with each change and runs only the affected ones (\`node scripts/harness.mjs test\`; add \`--no-e2e\` while iterating on UI). After each run it gives a review guide: what changed, tests run, the spots to review first and what you must do. Review in the chat; you rarely need to edit by hand. Before review:
 
 \`\`\`bash
 node scripts/harness.mjs check
@@ -40,6 +40,7 @@ Open a PR targeting **main**, mention both local ID and **actual Jira key**, att
 ## Integration and file ownership
 
 * Branch scope is declared per item in \`config/work-items.json\`. The checker flags files outside these paths. Each task can update its own \`worklogs/ID/\` proof.
+* Lead governance work (docs, config, harness scripts, progress and handoff) uses one reusable \`lead/config\` branch rather than a branch per PR. \`harness check\` accepts \`lead/*\` branches but rejects app code under \`src/\`, which always goes through a task branch.
 * Worklogs are per task and safe to merge independently. Only Reem updates shared \`progress.md\`, \`session-handoff.md\`, work-item ownership, sprint dates and global decisions, normally in dedicated lead PRs.
 * Components used by multiple members (tokens, contracts, shared layout, auth, schema) are **first approved in an early foundation PR**. Branches with stale assumptions rebase onto merged main and rerun tests before review.
 * Two developers should never modify the same shared component without agreeing which work item owns it. If new common behavior is needed, open a small lead-owned dependency PR rather than making a last-minute cross-branch edit.

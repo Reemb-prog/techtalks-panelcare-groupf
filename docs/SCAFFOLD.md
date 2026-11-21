@@ -1,5 +1,7 @@
 # First Next.js scaffold without overwriting harness files
 
+**Status: done.** PC-S1-01 scaffolded the app (merged ae9decd, KAN-13 Done). Kept as a record of how it was done; the E2E script is \`e2e\`, not \`test:e2e\`.
+
 Assigned task: PC-S1-01, Reem. This harness archive intentionally contains no \`package.json\`; the code has not been generated yet and app checks cannot run. In the approved S1 first PR, initialize the app with official stable \`create-next-app\` tooling using **npm**, TypeScript, App Router, Tailwind CSS, ESLint and \`src/\` layout.
 
 **Important:** Do not run \`create-next-app .\` directly over this nonempty harness directory, because the CLI may refuse to initialize or collide with existing files. Use a temporary sibling folder *outside the repository*. Review the generated tree, then copy **only** the generated project files that do not overwrite tracked harness files. Never overwrite CLAUDE.md, AGENTS.md, README.md, .gitignore, .github, docs, prompts or config automatically.

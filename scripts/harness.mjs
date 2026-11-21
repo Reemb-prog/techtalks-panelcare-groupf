@@ -13,7 +13,15 @@ const sprints = sprintConfig.sprints;
 const work = readJson('config/work-items.json');
 const byId = new Map(work.map((item) => [item.id, item]));
 const members = new Set(team.members.map((member) => member.slug));
-const commands = ['validate', 'member', 'list', 'start', 'plan', 'status', 'check'];
+const commands = ['validate', 'member', 'list', 'start', 'plan', 'status', 'check', 'test'];
+// Testing policy helpers (docs/TESTING.md, D12).
+const isTestFile = (file) => /^src\/.*\.(test\.tsx?|spec\.ts)$/.test(file);
+const isE2eSpec = (file) => /^src\/.*\.spec\.ts$/.test(file);
+const isSourceFile = (file) => /^src\/.*\.tsx?$/.test(file) && !file.endsWith('.d.ts');
+const isBehaviorFile = (file) => isSourceFile(file) && !isTestFile(file) && !file.startsWith('src/types/') && !file.includes('/fixtures/');
+const E2E_SPEC_DIR = /^src\/app\/__e2e__\/[^/]+\.spec\.ts$/;
+const FULL_UNIT_TRIGGERS = ['package.json', 'package-lock.json', 'tsconfig.json', 'vitest.config.ts'];
+const UI_PREFIXES = ['src/app/', 'src/components/', 'src/features/', 'src/styles/', 'playwright.config.ts'];
 const sprintNumber = (value) => (value ? Number(value.slice(1)) : Infinity);
 const coversPath = (prefix, file) => file === prefix || (prefix.endsWith('/') && file.startsWith(prefix));
 const ownsPath = (item, file) => item.paths.some((prefix) => coversPath(prefix, file)) && !(item.excludePaths || []).some((prefix) => coversPath(prefix, file));
@@ -119,7 +127,7 @@ function validate() {
       if (shared.size) problems.push('Parallel path overlap ' + a.id + ' / ' + b.id + ': ' + [...shared].join(', '));
     }
   }
-  for (const required of ['CLAUDE.md', 'docs/ROADMAP.md', 'docs/JIRA_PLAYBOOK.md', 'docs/DESIGN_BLUEPRINT.md', 'docs/CONTRACTS.md', 'docs/HOSTING_COSTS.md', 'docs/QUALITY_SECURITY.md', 'prompts/CLAUDE_JIRA_BOOTSTRAP.md']) {
+  for (const required of ['CLAUDE.md', 'docs/ROADMAP.md', 'docs/JIRA_PLAYBOOK.md', 'docs/DESIGN_BLUEPRINT.md', 'docs/CONTRACTS.md', 'docs/HOSTING_COSTS.md', 'docs/QUALITY_SECURITY.md', 'docs/TESTING.md', 'prompts/CLAUDE_JIRA_BOOTSTRAP.md']) {
     if (!fs.existsSync(path.join(root, required))) problems.push('Missing harness file: ' + required);
   }
   if (problems.length) fail(problems.join('\n'));
@@ -184,11 +192,21 @@ function writePlan() {
     '## Acceptance criteria', ...item.acceptance.map((value) => '* [ ] ' + value), '',
     ...(item.deferredScope ? ['## Deferred from this item (do not implement)', ...item.deferredScope.map((value) => '* ' + value), ''] : []),
     ...(item.risk ? ['## Known schedule risk', item.risk, ''] : []),
-    '## Tests and evidence', 'Intended: ' + item.test,
-    'Actual commands, date, environment and result (Passed/Failed/Not run/Blocked): NOT RUN',
-    'Screenshot/log link: NOT CAPTURED', '',
+    '## Tests (docs/TESTING.md: lowest layer that catches the bug; happy, misuse and error paths)',
+    'Task test hint: ' + item.test,
+    '* Unit: TO PLAN (rules/functions and the cases each covers)',
+    '* Integration: TO PLAN (adapter/handler/DB behaviors, or "none: <reason>")',
+    '* E2E: TO PLAN (screens/journeys and states, or "none: <reason>")',
+    '* Skipped paths, with one-line reason: none',
+    '', '## Evidence (Passed/Failed/Not run/Blocked; never claim an unexecuted check)',
+    'Affected run, node scripts/harness.mjs test: NOT RUN',
+    'Full run before review, node scripts/ci.mjs: NOT RUN',
+    'Manual checks (UI 375/768/1440, keyboard) and screenshot/log link: NOT CAPTURED', '',
     '## Risk, security and UX review',
     'Unknowns / mitigations / Impeccable critique if UI: TO COMPLETE', '',
+    '## Developer review guide (assistant updates after every run; see CLAUDE.md)',
+    'Review next (file:line and what to check): TO COMPLETE',
+    'Developer to fill or decide: TO COMPLETE', '',
     '## Handoff', 'Status: Planned | Files changed: none | Next step: obtain plan review', ''
   ].join('\n');
   fs.writeFileSync(target, contents);
@@ -199,6 +217,10 @@ function status() {
   console.log('Branch: ' + (branch || '(no active Git branch)'));
   if (branch === 'main' || !branch) {
     console.log('No task selected. Run validate/list, confirm Jira readiness, set member and start a branch.');
+    return;
+  }
+  if (/^lead\/[a-z0-9-]+$/.test(branch)) {
+    console.log('Lead governance branch: docs, config and harness only (no src/). Shared progress/handoff updates belong here.');
     return;
   }
   const item = taskFromBranch();
@@ -221,17 +243,64 @@ function changedFiles(base) {
   for (const line of untracked.split('\n')) if (line) candidates.add(line);
   return Array.from(candidates).sort();
 }
+function checkLeadBranch(branch, base) {
+  const appCode = changedFiles(base).filter((file) => file.startsWith('src/'));
+  if (appCode.length) fail('Lead branch ' + branch + ' may not change app code; use a task branch:\n' + appCode.map((file) => '  ' + file).join('\n'));
+  console.log('Lead branch CHECK OK for ' + branch + ': governance/docs/config only. Lead PRs still need a non-author reviewer.');
+}
 function check(base) {
   assertRepository();
+  const branch = currentBranch();
+  if (/^lead\/[a-z0-9-]+$/.test(branch)) return checkLeadBranch(branch, base);
   const item = taskFromBranch();
   const plan = path.join(root, 'worklogs', item.id, 'plan.md');
   if (!fs.existsSync(plan)) fail('Missing worklog plan. Run node scripts/harness.mjs plan and obtain human review.');
   const files = changedFiles(base);
   const worklog = 'worklogs/' + item.id + '/';
-  const invalid = files.filter((file) => !coversPath(worklog, file) && !ownsPath(item, file));
+  // E2E specs live in one shared folder; any task may add or edit its own screen's spec there (docs/TESTING.md).
+  const invalid = files.filter((file) => !coversPath(worklog, file) && !ownsPath(item, file) && !E2E_SPEC_DIR.test(file));
   if (invalid.length) fail('Files outside task scope:\n' + invalid.map((file) => '  ' + file).join('\n') + '\nRequest a scoped shared PR or lead-approved task change.');
+  const behavior = files.filter(isBehaviorFile);
+  if (behavior.length && !files.some(isTestFile) && !/^Test exemption:\s*\S/m.test(fs.readFileSync(plan, 'utf8'))) {
+    fail('Behavior files changed without any test change (docs/TESTING.md):\n' + behavior.map((file) => '  ' + file).join('\n') +
+      '\nAdd tests, or add a line "Test exemption: <reason>" to ' + path.relative(root, plan) + ' for the reviewer to judge.');
+  }
   console.log('Branch/sprint/owner CHECK OK for ' + item.id + '. Changed paths: ' + files.length + '.');
   console.log('Reminder: manual Jira dependency confirmation, plan approval, reviewer and actual test evidence are not machine-verified.');
+}
+
+function runNode(label, args) {
+  console.log('\nRUN (' + label + '): node ' + args.join(' '));
+  try {
+    execFileSync(process.execPath, args, { cwd: root, stdio: 'inherit' });
+    return true;
+  } catch {
+    return false;
+  }
+}
+/** Runs only the tests the branch's changes can affect (docs/TESTING.md). Full suite: node scripts/ci.mjs. */
+function affectedTests(options) {
+  assertRepository();
+  if (!fs.existsSync(path.join(root, 'node_modules'))) fail('Run npm ci first.');
+  const files = changedFiles(options.base);
+  const sources = files.filter(isSourceFile).filter((file) => !isE2eSpec(file));
+  const fullUnit = files.some((file) => FULL_UNIT_TRIGGERS.includes(file));
+  const uiChanged = files.some((file) => UI_PREFIXES.some((prefix) => coversPath(prefix, file)) || isE2eSpec(file));
+  const runE2e = options.e2e === true || (options.e2e !== false && uiChanged);
+  console.log('Changed files: ' + files.length + ' | source for Vitest: ' + sources.length + (fullUnit ? ' | shared config changed: full Vitest' : '') + ' | E2E: ' + (runE2e ? 'yes' : 'no'));
+  const results = [];
+  const vitest = 'node_modules/vitest/vitest.mjs';
+  if (fullUnit) results.push(['unit/integration (full)', runNode('full', [vitest, 'run'])]);
+  else if (sources.length) results.push(['unit/integration (related)', runNode('related', [vitest, 'related', '--run', '--passWithNoTests', ...sources])]);
+  else console.log('Vitest: NOT RUN, no runtime source or test files changed.');
+  if (runE2e) {
+    const ok = runNode('e2e', ['node_modules/@playwright/test/cli.js', 'test']);
+    if (!ok) console.log('If browsers are missing, run: npx playwright install chromium (then record Blocked or rerun).');
+    results.push(['e2e (Playwright)', ok]);
+  } else if (uiChanged) console.log('E2E: SKIPPED by --no-e2e although UI files changed. Run it before review.');
+  console.log('\n' + (results.length ? results.map(([name, ok]) => (ok ? 'PASSED ' : 'FAILED ') + name).join('\n') : 'Nothing to run.'));
+  console.log('Before review, run the full suite once: node scripts/ci.mjs');
+  if (results.some(([, ok]) => !ok)) process.exit(1);
 }
 
 const [command, arg, extra, other] = process.argv.slice(2);
@@ -248,4 +317,16 @@ switch (command) {
     if (arg === '--base' && (!extra || other)) fail('Usage: check [--base origin/main]');
     check(extra);
     break;
+  case 'test': {
+    const flags = process.argv.slice(3);
+    const options = {};
+    for (let i = 0; i < flags.length; i += 1) {
+      if (flags[i] === '--e2e') options.e2e = true;
+      else if (flags[i] === '--no-e2e') options.e2e = false;
+      else if (flags[i] === '--base' && flags[i + 1]) options.base = flags[(i += 1)];
+      else fail('Usage: test [--base origin/main] [--e2e | --no-e2e]');
+    }
+    affectedTests(options);
+    break;
+  }
 }
