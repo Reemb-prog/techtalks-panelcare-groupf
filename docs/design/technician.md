@@ -28,7 +28,8 @@ content. It does not implement backend functionality.
 1. The technician opens the My Jobs screen.
 2. The system displays jobs assigned to that technician.
 3. The technician selects a job.
-4. The technician reviews the job and system details.
+4. The technician reviews the job and system details. For an assigned job,
+   they select **Start Job** and wait for confirmation before continuing.
 5. The technician completes the safety and inspection
    checklist.
 6. The technician enters required measurements.
@@ -50,8 +51,8 @@ content. It does not implement backend functionality.
 - No invoicing, inventory, telemetry, or native mobile app.
 - Photo evidence is private and must not use decorative
   stock imagery as inspection proof.
-- Final checklist fields and evidence limits must follow
-  the approved PC-S1-03 contracts.
+- The checklist content map and evidence limits below use the frozen
+  PC-S1-03 contract.
 
 ## 4. Screen 1 — My Assigned Jobs
 
@@ -127,7 +128,8 @@ Permission denied:
 ### 4.6 Contract notes
 
 - GET /api/jobs returns jobs scoped to the technician.
-- The exact response fields depend on PC-S1-03.
+- Use the frozen job list and detail fields from PC-S1-03. A missing job
+  and a job outside the technician's scope both return 404.
 - S1 screens must use mock data only.
 - Do not imply live backend connectivity.
 
@@ -165,15 +167,26 @@ Display:
 - Required-field indicators
 - Validation messages
 
-Proposed checklist categories (not yet approved):
-- Safety checks
-- Solar panel condition
-- Inverter condition
-- Battery condition, if applicable
-- General observations
+**Routine solar maintenance visit — checklist content map**
 
-The exact checklist template, field names, and required
-responses must be confirmed against PC-S1-03.
+Use the versioned `ChecklistTemplate` returned by the adapter. This map
+uses the existing version 1 demo item IDs and identifies the fields to show.
+
+| Section | Question or field label | Item ID | Answer type and choices | Required | Unit and input range |
+| --- | --- | --- | --- | --- | --- |
+| Safety | Were the AC and DC isolators tested and locked out before work? | `safety_isolation` | Yes or no (boolean) | Yes | — |
+| Panels | What is the panel surface condition? | `panel_condition` | Choice: good, minor soiling, damage found | Yes | — |
+| Panels | Are the mounting and fixings secure? | `mounting_secure` | Yes or no (boolean) | Yes | — |
+| Inverter | Is the inverter free of active faults? | `inverter_no_faults` | Yes or no (boolean) | Yes | — |
+| Readings | What is the string DC voltage? | `dc_voltage` | Number | Yes | V, 0–1,500 |
+| Readings | What is the AC output at the time of the visit? | `ac_output` | Number | Yes | kW, 0–1,000 |
+| Battery | What is the battery state of charge? | `battery_soc` | Number | No. Applies only to systems with a battery. | %, 0–100 |
+| Panels | How much panel cleaning was performed? | `cleaning_done` | Choice: none, partial, full | Yes | — |
+| Observations | Other observations | `observations` | Text | No | — |
+
+The numeric ranges above match the S1 demo template's input validation.
+A required yes/no item needs an explicit answer. Both yes and no are valid
+answers. Use the returned template's version and constraints when submitting.
 
 ### 5.4 Measurements
 
@@ -183,14 +196,17 @@ Each measurement should include:
 - The appropriate unit
 - Validation feedback
 
-Do not invent measurement ranges or mandatory fields.
-Use the approved inspection contract when available.
+Keep the unit visible next to the input and use the bounds and required flags
+from the current template.
 
 ### 5.5 Actions
 
 - Back to My Jobs
-- Save Draft (only if supported by the agreed contract)
-- Continue to Photo Evidence
+- **Start Job** for a visit assigned to the signed-in technician. Send the
+  `start` action and current `expectedVersion` to `PATCH /api/jobs/:id`.
+  Wait for the job to change from `assigned` to `in_progress` before
+  continuing. If the version is stale (409), reload the job first.
+- **Continue to Photo Evidence** after the job is in progress.
 
 ### 5.6 Exceptional states
 
@@ -209,8 +225,8 @@ Network error:
 Show a retry option without losing confirmed data.
 
 Offline:
-Clearly distinguish unsaved entries from
-persisted drafts. Do not promise offline saving.
+Show that entries are unsaved. Keep them in the open form where possible.
+Reloading or closing the page may discard those entries.
 
 Stale job:
 If the job was changed or completed elsewhere,
@@ -230,7 +246,8 @@ explain the conflict and require refresh.
 - Checklist data belongs to an inspection.
 - The checklist uses a versioned template.
 - Measurements must include appropriate units.
-- Final field definitions depend on PC-S1-03.
+- The checklist map in Section 5.3 uses the PC-S1-03 template shape.
+- An outdated checklist version returns 409 and requires a reload.
 - S1 uses mock-backed behavior, not a live API.
 
 ## 6. Screen 3 — Photo Evidence and Notes
@@ -257,20 +274,20 @@ Handle:
 - Unsupported file types
 - Files exceeding the maximum size
 - Too many photos
-- Failed uploads
-- Missing required photos, if applicable
+- Failed photo registration in S1 or failed uploads in S2
 
-Exact photo limits and formats are pending
-confirmation from PC-S1-03.
+Accept JPEG, PNG, or WebP, up to 5 MB per file and 10 photos per job.
+See Section 11 for caption and evidence rules.
 
 ### 6.4 Offline and error behavior
 
 - Show a warning when offline.
-- Show a status for each photo. Use **Selected** when the file is in the open form,
-  **Uploading** while the upload is in progress, **Uploaded** only after the
-  relevant adapter confirms the upload, and **Failed** when it reports an error.
-- Distinguish unsaved changes from saved drafts.
-- For a failed upload, show **Retry** where supported and **Remove Photo**.
+- In S1, use **Selected**, **Adding (demo)**, **Added (demo)**, or **Failed**.
+  Show **Added (demo)** after the mock adapter confirms photo registration.
+- For a failed registration, show **Retry** where supported and **Remove Photo**
+  for the affected selection. The contract provides no photo deletion endpoint.
+- Real uploads can show **Uploading** and then **Uploaded** after the upload
+  is confirmed.
 - Preserve valid entries where technically possible.
 
 ### 6.5 Privacy and accessibility
@@ -286,7 +303,8 @@ confirmation from PC-S1-03.
 - Photos belong to an inspection.
 - Photo metadata includes type, size and caption.
 - Files are stored separately in private storage.
-- Sprint 1 uses mock behavior, not live uploads.
+- S1 registers photo metadata for the technician's own open job. The mock
+  returns no image URL. Real files and authorized retrieval are S2 work.
 
 ## 7. Screen 4 — Customer Confirmation and Final Submission
 
@@ -320,9 +338,9 @@ Customer acknowledgment:
 - Name of the person acknowledging the work
 - Acknowledgment action and recorded time
 
-The exact acknowledgment method and required fields
-must be confirmed against PC-S1-03.
-Do not assume a digital signature is required.
+The current S1 form uses a typed name of 2–120 characters and a required
+acknowledgment checkbox. The service supplies the timestamp. Final wording
+and customer acknowledgment signoff remain pending under D06.
 
 Actions:
 - Back to Edit
@@ -362,8 +380,9 @@ Network error:
 - Keep the form open. Do not automatically retry or show completion
   until the result is confirmed.
 - Do not assume the submission failed or succeeded.
-- Provide a safe retry or status-check path once
-  the approved contract defines it.
+- Check the current job status with `GET /api/jobs/:id` before offering recovery.
+  A retry of the unresolved submission must use the original request and
+  its original submission ID (`idempotencyKey`).
 
 Permission denied:
 - Explain that the technician cannot complete
@@ -377,8 +396,8 @@ Conflict:
 
 - Prevent repeated taps while submission is pending.
 - The backend must guarantee one report per job.
-- A repeated completion request must not create
-  another service report.
+- A repeat using the same submission ID for that job returns the same report after
+  completion. A different ID for an already completed job returns 409.
 - Never display a second success result as a
   separate completed inspection.
 - Handle uncertain network outcomes without
@@ -405,8 +424,9 @@ Conflict:
 - Completion creates the inspection and report
   transactionally.
 - One job must have only one service report.
-- Exact request and response shapes are pending
-  PC-S1-03 approval.
+- Only the assigned technician can complete a job in progress. Submit the
+  current checklist version, answers, notes, photo IDs, confirmation and
+  submission ID using the frozen request fields.
 - Sprint 1 uses mock-backed behavior only.
 
 ## 8. Screen 5 — Service Report
@@ -489,7 +509,9 @@ unless offline access has been implemented.
 
 ### 8.6 Contract notes
 
-- GET /api/reports/:id is restricted to authorized users.
+- GET /api/reports/:id is restricted to authorized users. A missing report
+  and one outside the technician's scope both return 404. Use the same
+  unavailable message for either 404 response.
 - A service report belongs to one maintenance job.
 - Reports contain a historical snapshot.
 - Each job can have only one service report.
@@ -517,6 +539,7 @@ MY JOBS
 JOB DETAILS & CHECKLIST
   [Back to My Jobs]
   Site, system, scheduled date, job ID, status
+  [Start Job] if assigned | wait for In progress
   Safety and inspection items [Responses]
   Readings [Numeric fields with units]
   Field errors beside the relevant inputs
@@ -526,7 +549,7 @@ PHOTO EVIDENCE
   [Back to Checklist]
   Job context and evidence guidance
   [Add Photo]
-  Preview, status (Selected / Uploading / Uploaded / Failed)
+  Preview, S1 status (Selected / Adding (demo) / Added (demo) / Failed)
   [Caption], [Remove Photo], [Retry if supported and failed]
   [Inspection Notes]
   [Continue to Customer Confirmation]
@@ -535,7 +558,7 @@ REVIEW & CONFIRM
   [Back to Photo Evidence]
   Job, checklist, readings, evidence and notes summary
   [Back to Edit]
-  Customer acknowledgment [Fields pending approval]
+  Customer acknowledgment [Typed name] [Checkbox] (final wording pending)
   Validation or submission status
   [Submit Inspection] or [View Service Report] when confirmed
 
@@ -555,11 +578,12 @@ reading column. Use extra width for job cards and evidence previews where they f
 ```text
 My Jobs          Header and status | up to two job cards per row
                  Each card has site, system, date, status and [View Job]
-Checklist        [Back] | job context above checklist and readings with units
+Checklist        [Back] | job context | [Start Job] if assigned
+                 Checklist and readings with units when In progress
                  Inline errors | [Continue to Photo Evidence]
 Photo Evidence   [Back] | guidance and [Add Photo] | up to two previews per row
-                 Directly under each photo, group its caption, upload status,
-                 [Remove Photo] and [Retry] if the upload failed and retry is supported
+                 Directly under each photo, group its caption, status,
+                 [Remove Photo] and [Retry] if adding the photo failed and retry is supported
                  Below the photo grid: [Notes] | [Continue]
 Review & Confirm [Back] | job and inspection summary | [Back to Edit]
                  Acknowledgment and status | [Submit] or [View Service Report]
@@ -576,7 +600,8 @@ when space is tight. Put errors and submission messages with the main action.
 ```text
 My Jobs          Header and status above job cards in columns
                  Each card has site, system, date, status and [View Job]
-Checklist        Main: checklist, readings with units, errors, [Continue]
+Checklist        Main: [Start Job] if assigned, then checklist and readings
+                       with units, errors, [Continue] once In progress
                  Side: site, system, date, job ID and status (proposed sticky panel)
 Photo Evidence   Main: guidance, [Add Photo], previews, captions, remove, [Notes], [Continue]
                  Side: job context
@@ -593,7 +618,7 @@ column so it does not cover fields, messages or actions. On smaller screens,
 place the job information above the checklist in the normal page flow so it
 scrolls with the rest of the page.
 
-Show Save Draft on the checklist only if the agreed contract supports it.
+Keep unsent entries in the open form where possible.
 Keep the same action names and back navigation across widths.
 
 ## 10. Offline, recovery and completion
@@ -604,35 +629,34 @@ Keep the same action names and back navigation across widths.
 | Open a screen while offline | Show “You're offline” and explain if the requested information is unavailable. Any future cached job data requires an approved offline storage and access policy. |
 | Connection drops while editing | Keep entries in the open form where possible. Show “Unsaved changes on this screen” and explain that reload or closing the page may lose them. Disable actions that require a connection and explain why. |
 | Leave with unsaved changes | For navigation within PanelCare, warn that edits may be lost. Offer “Keep editing” and “Leave without saving.” Apply the same warning to unsaved photo selections. |
-| Save Draft is supported | Show “Saving draft…” while waiting and “Draft saved” only after confirmation. On failure, show “Draft couldn't be saved,” retain the open form and allow retry when connected. Restore a draft only if supported and still authorized for this job. |
-| Load or upload fails | Explain what failed and offer Retry for that operation. Keep other valid entries in the open form. Mark each failed photo separately and offer removal or a retry where supported. |
+| Draft or offline storage | The current contract has no draft save, restore, or offline cache. Keep unsent entries only in the open form where possible and warn that leaving or reloading can discard them. |
+| Load or photo registration fails | Explain what failed and offer Retry where supported. Keep other valid entries in the open form. Mark the failed photo and offer to remove the local selection. |
 | Input is missing or invalid | Put a text message beside each affected field. On submit, show an error summary and help the technician jump to the first error. Keep valid values. |
 | Access is denied or the job changes | Explain what happened. Hide restricted data and actions after access is lost. If the job changed, refresh and check its current state before allowing further edits. |
 | Submit is in progress | Show “Submitting inspection…” and disable further submit attempts. |
-| Submit times out or loses the connection | Show “Submission status unknown. We couldn't confirm whether your inspection was submitted. Please don't submit again until the job status has been checked.” Keep the form open and hold further submissions until the approved recovery path can check the outcome or safely repeat the same completion request. Reconnecting alone does not submit it. |
+| Submit times out or loses the connection | Show “Submission status unknown. We couldn't confirm whether your inspection was submitted. Please don't submit again until the job status has been checked.” Keep the form open. After the job status check, a manual retry of the same submission uses the original request and submission ID. Reconnecting alone does not submit it. |
 | Completion is confirmed, including a repeat request that returns the existing report | Show one completed state and link to the same service report. The project blueprint calls for one report per job, including repeated completion requests. |
 | Completion is rejected with a confirmed validation error | Reopen the affected step for correction. Enable Submit again once the errors are resolved. |
 
-Draft storage, draft restore, offline caching, and the exact way to check or
-retry an uncertain submission are pending contract confirmation. S1 can
-walk through these states with mock responses. Show the same distinction
-between a selected photo, a confirmed upload and a completed inspection.
+S1 can walk through these states with mock responses. The mocks hold data in
+memory for the current session. A selected photo, confirmed demo photo
+registration, and confirmed inspection completion are separate states.
 
 ## 11. Photo evidence limits and feedback
 
 | Detail | Design treatment |
 | --- | --- |
-| Allowed file types | Pending PC-S1-03 confirmation. Explain accepted types beside Add Photo once agreed. Explain how to replace an unsupported file. |
-| Maximum size per file | Pending PC-S1-03 confirmation. Show the limit before selection and identify the file that exceeds it. |
-| Maximum photo count | Pending PC-S1-03 confirmation. Show the count and the agreed maximum once known. If full, explain how to remove a photo to make room. |
-| Minimum count and required categories | Pending PC-S1-03 confirmation. Explain which photos are required once agreed and link back to Photos when any are missing. |
-| Caption requirements | Pending PC-S1-03 confirmation. Keep each caption associated with its own photo. |
+| Allowed file types | JPEG, PNG, or WebP. Show accepted types beside Add Photo. Explain how to replace an unsupported file. |
+| Maximum size per file | 5 MB. About 1 MB is the target. Show the limit before selection and identify the file that exceeds it. |
+| Maximum photo count | 10 per job. Show the current count and explain how to remove a selection to make room before registration. |
+| Minimum count and required categories | The frozen completion validator accepts zero photos. No required photo category is defined. |
+| Caption requirements | Optional, up to 200 characters. Keep each caption with its own photo. |
 | Consent, retention and detailed access policy | Pending lead review under D07. Design for private evidence and authorized access. Use synthetic examples in reviews. |
 
 Place guidance before the photo picker and feedback next to the affected
-file. A selected preview means the file is available in the open form.
-Show “Uploaded” only after confirmation. If a required photo fails, explain
-what must be fixed before completing the inspection.
+file. A preview means the file is selected. Show **Added (demo)** only after
+mock registration is confirmed. In S2, show **Uploaded** after confirmation
+of the actual upload.
 
 ## 12. Technician walkthrough and accessibility checklist
 
@@ -645,9 +669,9 @@ what must be fixed before completing the inspection.
 - [ ] Enter an invalid reading and omit a required answer. Check that the
   message names the affected field and other entries stay in place.
 - [ ] With sample files, review unsupported type, size and count feedback,
-  upload failure and removal. Use approved limits when available.
-- [ ] Walk through losing the connection, leaving with unsaved edits and a
-  failed draft save if supported. Check what is retained and what can be lost.
+  registration failure and removal of a local selection.
+- [ ] Walk through losing the connection and leaving with unsaved edits.
+  Check what stays in the open form and what may be lost.
 - [ ] Walk through a rapid double tap and a lost completion response.
   Confirm the design shows uncertainty and opens the same report when
   completion is confirmed.
@@ -657,8 +681,9 @@ what must be fixed before completing the inspection.
 ### 12.2 Accessibility checks
 
 Do not rely on color alone to communicate status, errors, or required actions. Use clear text labels alongside any color indicators.
-For photo uploads, show the current status as text, such as **Uploading**,
-**Uploaded**, or **Failed**.
+Show photo status as text. Use **Adding (demo)**, **Added (demo)**, or
+**Failed** for mock registration and **Uploading**, **Uploaded**, or
+**Failed** for real uploads.
 
 - [ ] Confirm primary and secondary actions fit at 375 px without sideways
   scrolling. Check one-handed reach and leave space between touch targets.
