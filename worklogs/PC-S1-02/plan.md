@@ -1,8 +1,8 @@
 # PC-S1-02: Impeccable design discovery, sitemap and approved design tokens
 
 Sprint: S1 | Owner: mahdi | Reviewer: reem
-Jira key: KAN-14 | Draft PR: this pull request | Planned start D1, review-ready day: D4
-Plan review: Pending | Approver: Reem W. Basho | Date: pending
+Jira key: KAN-14 | Plan PR: #13 (merged) | Planned start D1, review-ready day: D4
+Plan review: Approved to proceed, relayed by Mahdi | Approver: Reem W. Basho | Date: 2026-11-21. Reem merged plan PR #13.
 
 ## Goal and scope
 Document the PanelCare UX and provide importable design tokens for the PC-S1-05 coordinator shell. [Figma design](https://www.figma.com/design/bV24mBw1ktLfzkCbzXu3hT) and the PDF on [KAN-14](https://techtalks-panelcare.atlassian.net/browse/KAN-14) are review references.
@@ -31,30 +31,30 @@ Excluded (owned by other tasks):
 5. Review wireframe coverage at 375, 768, and 1440 px; record actual critique, accessibility checks, and lead approval. Use fallback surfaces for uncleared photos in implementation.
 
 ## Acceptance criteria
-* [ ] Document personas, screen sitemap and each page's content hierarchy
+* [x] Document personas, screen sitemap and each page's content hierarchy
 * [ ] Show desktop/mobile wireframes and approve typography, spacing, color, forms and status semantics
 * [ ] Discover Pinterest references; record source and usage rights for any production image
 * [ ] Record explicit lead design approval before feature pages
-* [ ] Design tokens live in src/styles/; do not edit src/app/ files or PC-S1-04 technician design docs
+* [x] Design tokens live in src/styles/; do not edit src/app/ files or PC-S1-04 technician design docs
 
 ## Tests (docs/TESTING.md: lowest layer that catches the bug; happy, misuse and error paths)
 Task test hint: Design critique checklist, screenshot comparison and lead signoff
-* Unit: Validate CSS parsing, required token declarations, and status color contrast once implemented.
+* Unit: Check required token declarations and uniqueness, status and action text contrast, and focus and control borders.
 * Integration: None for foundations; PC-S1-05 owns runtime integration.
-* E2E: None for the plan-only draft; review Figma at target widths and repeat on the integrated shell in PC-S1-05.
+* E2E: Existing desktop and mobile home smoke tests. PC-S1-05 will verify the integrated shell.
 * Skipped paths, with one-line reason: none
 
 ## Evidence (Passed/Failed/Not run/Blocked; never claim an unexecuted check)
-Affected run, node scripts/harness.mjs test: NOT RUN
-Full run before review, node scripts/ci.mjs: NOT RUN
-Manual checks (UI 375/768/1440, keyboard) and screenshot/log link: NOT CAPTURED
+Affected run, node scripts/harness.mjs test: Passed (10 token checks and both desktop/mobile home smoke tests).
+Full run before review, node scripts/ci.mjs: Passed (harness validation, lint, typecheck, 100 tests, and production build).
+Manual checks: not run at 375/768/1440 or with keyboard for the application. The linked Figma boards show 390 px mobile and 1440 px desktop designs. Mockup PDF is on KAN-14.
 
 ## Risk, security and UX review
-Risks: provisional palette mismatch, uncleared mockup photos, and downstream token naming. Reem reviews proposed input/output contract before coding. Impeccable critique: not run.
+Risks: provisional palette mismatch, uncleared mockup photos, and downstream token naming. Reem reviews the token meanings and import contract before merge. Impeccable critique: not run.
 
 ## Developer review guide (assistant updates after every run; see CLAUDE.md)
-Review the Implementation plan for token semantics, import ownership, and the page hierarchy boundary.
-Reem: approve the plan in this PR or KAN-14 and confirm the blue palette direction and token import contract.
+Review `src/styles/tokens.css:2` for public names and color pairings, `docs/DESIGN_BLUEPRINT.md:16` for role navigation and import ownership, and `assets/image-manifest.csv:5` for publication restrictions.
+Reem: review the implementation PR, confirm the final palette and token import contract, and record final design signoff. The implemented shell still needs responsive screenshot and keyboard evidence.
 
 ## Handoff
-Status: Planned | Files changed: this plan only | Next step: obtain plan review
+Status: Implementation review | Next step: Reem reviews the blueprint, stylesheet and contrast tests. PC-S1-05 wires the import after merge.

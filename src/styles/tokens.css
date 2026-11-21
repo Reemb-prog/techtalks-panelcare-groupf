@@ -1,0 +1,62 @@
+:root {
+  --pc-color-canvas: #f2f6fd;
+  --pc-color-surface: #fff;
+  --pc-color-text: #112744;
+  --pc-color-text-muted: #455c78;
+  --pc-color-border: #c4d3e8;
+  --pc-color-control-border: #7389a4;
+  --pc-color-primary: #1757b8;
+  --pc-color-primary-hover: #12458f;
+  --pc-color-on-primary: #fff;
+  --pc-color-accent: #dfebff;
+  --pc-color-focus: #2563eb;
+  --pc-color-disabled: #e1e9f4;
+
+  --pc-status-neutral-bg: #e1e9f4;
+  --pc-status-neutral-text: #455c78;
+  --pc-status-info-bg: #dfebff;
+  --pc-status-info-text: #12458f;
+  --pc-status-warning-bg: #f9d983;
+  --pc-status-warning-text: #573800;
+  --pc-status-success-bg: #e0f4e8;
+  --pc-status-success-text: #17563a;
+  --pc-status-danger-bg: #fce7e7;
+  --pc-status-danger-text: #9e3131;
+
+  --pc-font-sans: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --pc-type-caption: 0.75rem;
+  --pc-line-caption: 1rem;
+  --pc-type-control: 0.875rem;
+  --pc-line-control: 1.25rem;
+  --pc-type-body: 1rem;
+  --pc-line-body: 1.5rem;
+  --pc-type-card: 1.125rem;
+  --pc-line-card: 1.5rem;
+  --pc-type-section: 1.5rem;
+  --pc-line-section: 2rem;
+  --pc-type-page: 2rem;
+  --pc-line-page: 2.5rem;
+  --pc-type-display: 2.5rem;
+  --pc-line-display: 3rem;
+  --pc-weight-regular: 400;
+  --pc-weight-semibold: 600;
+  --pc-weight-bold: 700;
+
+  --pc-space-1: 0.25rem;
+  --pc-space-2: 0.5rem;
+  --pc-space-3: 0.75rem;
+  --pc-space-4: 1rem;
+  --pc-space-6: 1.5rem;
+  --pc-space-8: 2rem;
+  --pc-space-12: 3rem;
+  --pc-space-16: 4rem;
+
+  --pc-radius-control: 0.5rem;
+  --pc-radius-card: 0.75rem;
+  --pc-radius-panel: 1rem;
+  --pc-radius-pill: 999px;
+  --pc-control-min-height: 2.75rem;
+  --pc-focus-width: 2px;
+  --pc-shadow-card: 0 2px 8px rgb(17 39 68 / 8%);
+  --pc-shadow-overlay: 0 8px 24px rgb(17 39 68 / 14%);
+}
