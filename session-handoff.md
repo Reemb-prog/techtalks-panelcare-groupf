@@ -1,7 +1,16 @@
 # Lead session handoff
 
-Branch: repository skeleton, not initialized in a Git remote by this package.
-Active task: none; initialize member and select an issue only after Jira review.
-Do not assume implementation exists. The planned first task is PC-S1-01.
-Blockers: final academic deadline; Jira member identities/project; recurrence timezone and month-clamp decision; approved image/confirmation privacy.
-Next human action: decide whether recommended 6 weeks or constrained 4 weeks is authorized. Then import repository, grant access and run prompts/CLAUDE_JIRA_BOOTSTRAP.md.
+Updated: 2026-11-21 by Reem (lead) with Claude.
+Repository: GitHub Reemb-prog/techtalks-panelcare-groupf (moved from Reemb-prog/PanelCare). Jira: project KAN.
+Main: 458c6a4 (PC-S1-01 and PC-S1-03 merged). Lead branch: lead/config (governance, docs, config only; never app code under src/).
+
+Active lead task: PC-S1-05 coordinator shell (KAN-17), not started. Earliest start D5 (Nov 24); waits on PC-S1-02 for tokens.
+
+Open decisions: D02 provider (Proposed), D06 customer confirmation (Proposed, Tarek, S1 UX signoff), D07 image storage policy (Needs review, before S2), D08 hosting terms (Conditional, before deploy), D10 PR approval policy (Proposed).
+
+Blockers: PC-S1-02 (Mahdi, KAN-14) still To Do; it gates every S1 screen.
+
+Notes for the next session:
+* PC-S1-05 plan should cover: a client-side provider holding one `createMockAdapters()` instance, mock role kept in sessionStorage (in-memory sessions are lost on reload), a visible "mock" label on role selection, dashboard numbers from `adapters.dashboard.getStats()`, and the slow/error/empty/denied mock scenarios for loading, error and empty states.
+* Small follow-ups for Rand, not blocking: `simulate()` in src/lib/adapters/mock/runtime.ts passes a possibly-null session as `Session` to signed-out handlers; three files in src/lib (recurrence.ts, job-status.ts, dates.ts) start with a UTF-8 BOM. Rand should also tick the acceptance checkboxes in worklogs/PC-S1-03/plan.md.
+* Next human action: review and merge the lead PR from lead/config; confirm Mahdi's PC-S1-02 start at standup.

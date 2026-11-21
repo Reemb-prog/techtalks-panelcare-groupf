@@ -40,6 +40,7 @@ Open a PR targeting **main**, mention both local ID and **actual Jira key**, att
 ## Integration and file ownership
 
 * Branch scope is declared per item in \`config/work-items.json\`. The checker flags files outside these paths. Each task can update its own \`worklogs/ID/\` proof.
+* Lead governance work (docs, config, harness scripts, progress and handoff) uses one reusable \`lead/config\` branch rather than a branch per PR. \`harness check\` accepts \`lead/*\` branches but rejects app code under \`src/\`, which always goes through a task branch.
 * Worklogs are per task and safe to merge independently. Only Reem updates shared \`progress.md\`, \`session-handoff.md\`, work-item ownership, sprint dates and global decisions, normally in dedicated lead PRs.
 * Components used by multiple members (tokens, contracts, shared layout, auth, schema) are **first approved in an early foundation PR**. Branches with stale assumptions rebase onto merged main and rerun tests before review.
 * Two developers should never modify the same shared component without agreeing which work item owns it. If new common behavior is needed, open a small lead-owned dependency PR rather than making a last-minute cross-branch edit.

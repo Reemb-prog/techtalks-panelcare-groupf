@@ -5,8 +5,8 @@
 | D01 | Next.js App Router, React, TypeScript, npm lockfile, Tailwind, shadcn/ui | Selected | Reem, S1 scaffold |
 | D02 | Single Next.js REST backend, Supabase Postgres/Auth/Storage, Vercel | Proposed | Reem, S0 cost and security review |
 | D03 | Four-week deadline: two 12-calendar-day sprints, Nov 20–Dec 13, weekends included (replaces three two-week sprints, Nov 23–Jan 3) | Approved 2026-11-20, see CR-01 | Reem |
-| D04 | Single-company MVP and two roles | Assumed | Reem, before S1 contract freeze |
-| D05 | Asia/Beirut business timezone, month-end clamp, half-open 90-day window | Proposed | Reem and Rand, S1 contract freeze |
+| D04 | Single-company MVP and two roles (coordinator, technician) | Approved 2026-11-21, confirmed by the frozen PC-S1-03 contract | Reem |
+| D05 | Asia/Beirut business timezone, month-end clamp from the original anchor, half-open 90-day window | Approved 2026-11-20 at PC-S1-03 plan review; implemented in docs/CONTRACTS.md | Reem and Rand |
 | D06 | Typed name, acknowledgment and timestamp as customer confirmation | Proposed | Reem and Tarek, S1 UX signoff |
 | D07 | Private image evidence storage; image retention/access policy | Needs review | Reem, before S2 policies |
 | D08 | Vercel Hobby only for personal noncommercial demonstration; free tier terms | Conditional | Reem, before deployment |

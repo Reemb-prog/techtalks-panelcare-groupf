@@ -1,6 +1,6 @@
 # PanelCare: shared Claude Code engineering harness
 
-This repository starts with the **harness, not a fabricated application**. Four human developers and their separate Claude Code sessions use the same repository, a common Jira Scrum board, focused task branches, repeatable quality gates, and lead-managed Vercel deployment.
+This repository holds the **harness and the PanelCare application** (Next.js app scaffolded in PC-S1-01; typed contract and mocks in PC-S1-03). Four human developers and their separate Claude Code sessions use the same repository, a common Jira Scrum board, focused task branches, repeatable quality gates, and lead-managed Vercel deployment.
 
 **Team:** Reem W. Basho (lead), Rand Al Yaman, Mahdi Dagher, Tarek Bdairi.
 
@@ -9,7 +9,7 @@ This repository starts with the **harness, not a fabricated application**. Four 
 ## Read this first
 
 1. Read [CLAUDE.md](CLAUDE.md) and [docs/ROADMAP.md](docs/ROADMAP.md).
-2. Reem creates a private repository called \`panelcare\`, adds collaborators, and imports this folder at the root. No accounts are created by this ZIP.
+2. The shared private repository is \`Reemb-prog/techtalks-panelcare-groupf\` on GitHub (done). Clone it; run \`npm ci\` after every pull that changes \`package-lock.json\`.
 3. Reem runs the separately supplied Jira setup prompt in Claude **with Jira access**. It reads [docs/JIRA_PLAYBOOK.md](docs/JIRA_PLAYBOOK.md), [config/sprints.json](config/sprints.json) and [config/work-items.json](config/work-items.json). Jira issue keys are recorded in Jira or the PR descriptions; local stable IDs stay unchanged.
 4. Each member clones the repository and executes:
 

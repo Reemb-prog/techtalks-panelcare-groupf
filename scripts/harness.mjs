@@ -219,6 +219,10 @@ function status() {
     console.log('No task selected. Run validate/list, confirm Jira readiness, set member and start a branch.');
     return;
   }
+  if (/^lead\/[a-z0-9-]+$/.test(branch)) {
+    console.log('Lead governance branch: docs, config and harness only (no src/). Shared progress/handoff updates belong here.');
+    return;
+  }
   const item = taskFromBranch();
   console.log('Task: ' + item.id + (item.jiraKey ? ' (' + item.jiraKey + ')' : '') + ' | ' + item.title);
   console.log('Sprint ' + item.sprint + ' | owner ' + item.owner + ' | reviewer ' + item.reviewer + ' | start D' + item.startDay + ' | PR day D' + item.prDay);
@@ -239,8 +243,15 @@ function changedFiles(base) {
   for (const line of untracked.split('\n')) if (line) candidates.add(line);
   return Array.from(candidates).sort();
 }
+function checkLeadBranch(branch, base) {
+  const appCode = changedFiles(base).filter((file) => file.startsWith('src/'));
+  if (appCode.length) fail('Lead branch ' + branch + ' may not change app code; use a task branch:\n' + appCode.map((file) => '  ' + file).join('\n'));
+  console.log('Lead branch CHECK OK for ' + branch + ': governance/docs/config only. Lead PRs still need a non-author reviewer.');
+}
 function check(base) {
   assertRepository();
+  const branch = currentBranch();
+  if (/^lead\/[a-z0-9-]+$/.test(branch)) return checkLeadBranch(branch, base);
   const item = taskFromBranch();
   const plan = path.join(root, 'worklogs', item.id, 'plan.md');
   if (!fs.existsSync(plan)) fail('Missing worklog plan. Run node scripts/harness.mjs plan and obtain human review.');
