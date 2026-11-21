@@ -1,4 +1,6 @@
 page,section,role,pinterest_reference_url,original_source_url,creator,license_url,license_verified_on,licensed_local_path,alt_text,status,notes
-sign-in,desktop-side-photo,solar-rooftop,,,,,,,planned,"Find a real solar installation photo via Pinterest discovery; production source requires verified rights"
-system-detail,site-photo,site-evidence,,,,,,,planned,"Must be owned/uploaded with permission; no stock photo misrepresented as customer installation"
-technician-checklist,evidence-gallery,inspection-evidence,,,,,,,planned,"Private customer inspection photo; do not use Pinterest stock as evidence"
+sign-in,desktop-side-photo,solar-rooftop,,,,,,,,planned,"Find a real solar installation photo via Pinterest discovery; production source requires verified rights"
+system-detail,site-photo,site-evidence,,,,,,,,planned,"Must be owned/uploaded with permission; no stock photo misrepresented as customer installation"
+technician-checklist,evidence-gallery,inspection-evidence,,,,,,,,planned,"Private customer inspection photo; do not use Pinterest stock as evidence"
+sign-in,photo-reference,solar-rooftop,,https://www.energyvision.be/en/energy-solutions-0,EnergyVision,,,,Technician beside rooftop panels,reference-only,Usage rights unverified. Figma review only.
+system-detail,photo-reference,illustration,,https://apelectricalservices.com.au/installation-guide/hiring-certified-solar-installers-in-adelaide,AP Electrical Services,,,,Technician working near rooftop panels,reference-only,Usage rights unverified. This example does not depict the customer installation.
