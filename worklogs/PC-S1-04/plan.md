@@ -4,7 +4,7 @@
 **Owner:** tarek  
 **Reviewer:** mahdi  
 **Jira key:** KAN-16  
-**Draft PR:** TO CONFIRM  
+**Merged design PR:** [#12](https://github.com/Reemb-prog/techtalks-panelcare-groupf/pull/12)
 **Planned start:** D1 (2026-11-20)  
 **Review-ready:** D4 (2026-11-23)  
 **Plan review:** Self-approved (routine task, D11)  
@@ -72,11 +72,19 @@ None.
    - Obtain visual direction approval before building screens.
    - Record any applicable Impeccable critique using actual results.
 
+## Documentation follow-up plan
+
+Tarek approved the documentation-only follow-up on 2026-11-22. Start from
+current main and update this worklog and `docs/design/technician.md`. Align the
+photo guidance, checklist map, and job and submission flow with frozen PC-S1-03.
+Check limits, scope and privacy wording against the existing validators and
+adapters. Run the scope check and CI. Mahdi is the designated reviewer.
+
 ## Acceptance criteria
 
 - [x] Define assigned job → checklist → photos → confirmation → report journey.
 - [x] Design offline/error/draft/duplicate-submit behavior.
-- [ ] Show touch-friendly small-screen wireframes, fields and evidence limits. Draft wireframes are present at 375, 768 and 1440 px. Exact limits are pending PC-S1-03 confirmation.
+- [x] Show touch-friendly small-screen wireframes, fields and evidence limits. The wireframes cover 375, 768 and 1440 px. The design includes the checklist content map and the frozen evidence limits.
 - [ ] Obtain visual direction approval before building.
 - [x] Document empty, loading, invalid-input and permission-denied states.
 - [ ] Complete technician walkthrough and accessibility review. Preliminary documentation walkthroughs complete for all five screens at 375 px, 768 px, and 1440 px. Preliminary design-level accessibility review complete. Review by Mahdi is pending.
@@ -112,6 +120,14 @@ None.
 
 Results will be recorded as Passed, Failed, Not run, or Blocked after actual execution.
 
+### Documentation follow-up checks (2026-11-22)
+
+- Passed — read-only merge check confirmed PR #12 is present on main. The new local task branch was created at the live main commit `9ba5934`.
+- Passed — `git diff --check` and `node scripts/harness.mjs check` confirmed a clean diff and two in-scope changed files.
+- Not run by `node scripts/harness.mjs test` — the affected-test runner found no runtime or test changes.
+- Passed — `node scripts/ci.mjs` ran project validation, lint, type checking, 100 existing Vitest tests across 8 files, and the production build. The first attempt stopped at type checking because the local install lacked Zod. Installing the locked dependencies with `npm ci` resolved it.
+- Not run — browser E2E, manual application accessibility checks, and Impeccable critique. No behavior changes or new application tests were part of this follow-up.
+
 ## Risk, security and UX review
 
 - **Offline behavior:** Do not assume drafts are persisted or synchronized without confirming the implementation contract.
@@ -125,8 +141,21 @@ Results will be recorded as Passed, Failed, Not run, or Blocked after actual exe
 
 ## Handoff
 
-**Status:** Preliminary documentation walkthroughs and design-level accessibility review are complete. The documentation is ready for a draft PR. Confirm the evidence limits or agree with the team to leave them pending before marking it review-ready. Review by Mahdi and visual approval are pending.  
+**Status:** PR #12 is merged on main. The documentation follow-up aligns the design with the frozen PC-S1-03 contract. The preliminary walkthroughs and design-level accessibility review are complete. Confirm the PR review record and visual approval.
 **Files changed:** docs/design/technician.md and this worklog  
-**Next step:** Walk through the design with Mahdi and get visual direction approval from Reem before building. Confirm remaining checklist, evidence, draft and completion recovery details with PC-S1-03. Confirm customer acknowledgment (D06) with Reem and record the evidence privacy decisions (D07) before collecting real photos.
+**Next step:** Have Mahdi review the documentation follow-up, and record Reem's visual approval before building screens under PC-S1-08. Confirm final customer acknowledgment wording (D06) at S1 signoff and evidence consent and retention (D07) before collecting real photos.
 
 Lead handoff: npm flagged the existing Next.js 15.5.4 dependency with a security advisory during installation. Reem should route any dependency update through a separate task because it affects shared dependencies and the application build.
+
+## Developer review guide
+
+### Review these first
+
+- `docs/design/technician.md`, Sections 5.3–5.5: confirm the checklist questions, required fields, units and the Start Job transition.
+- `docs/design/technician.md`, Sections 7 and 10: confirm that the retry uses the same submission ID and that unsent work stays only in the open form.
+- `docs/design/technician.md`, Section 11: confirm the photo limits, demo registration labels and the pending privacy decisions.
+
+### Human decisions
+
+- Mahdi reviews the document updates. Confirm and record the existing PR #12 review outcome.
+- Reem confirms visual direction before PC-S1-08 screen work, final acknowledgment wording at S1 signoff (D06), and consent and retention before collecting real evidence (D07).
