@@ -77,11 +77,11 @@ permission-denied state ("The dashboard is for coordinators") with a link back t
 
 ## Acceptance criteria
 
-* [ ] Dashboard has meaningful overview and navigable sidebar, search entry and statuses
-* [ ] Simulated role selection is visibly labeled mock, not production login
-* [ ] Keyboard/mobile navigation and loading/empty/error states work
-* [ ] Wire the PC-S1-02 tokens from src/styles/ into src/app/globals.css (single import) after PC-S1-01 and PC-S1-02 merge
-* [ ] Empty, loading, error, invalid-input and permission-denied states handled (no fake persisted success) (Jira)
+* [x] Dashboard has meaningful overview and navigable sidebar, search entry and statuses
+* [x] Simulated role selection is visibly labeled mock, not production login
+* [x] Keyboard/mobile navigation and loading/empty/error states work
+* [x] Wire the PC-S1-02 tokens from src/styles/ into src/app/globals.css (single import) after PC-S1-01 and PC-S1-02 merge
+* [x] Empty, loading, error, invalid-input and permission-denied states handled (no fake persisted success) (Jira)
 
 ## Tests (docs/TESTING.md: lowest layer that catches the bug; happy, misuse and error paths)
 
@@ -104,27 +104,46 @@ Task test hint: Playwright mock route and manual 375px/768px/1440px inspection
 
 ## Evidence (Passed/Failed/Not run/Blocked; never claim an unexecuted check)
 
-Affected run, node scripts/harness.mjs test: NOT RUN
-Full run before review, node scripts/ci.mjs: NOT RUN
-Manual checks (UI 375/768/1440, keyboard) and screenshot/log link: NOT CAPTURED
+Run on 2026-11-22, Windows 11, Node 23.1, branch s1/reem/pc-s1-05 on main 176b24a.
+
+* Affected run, `node scripts/harness.mjs test`: unit (related) **Passed** 3 files / 18 tests. E2E **Failed** 2 of 14 on the first run (the sign-in test, both projects): a cold `next dev` compile of /dashboard ran past the 5 s assertion timeout. That navigation now has a 20 s timeout. Reruns: `--repeat-each=2` 26 passed / 2 skipped; cold full run (no dev server running) 13 passed / 1 skipped, twice.
+* Full run, `node scripts/ci.mjs`: **Passed**. Harness validate, lint, typecheck, Vitest 11 files / 118 tests (100 existing + 18 new), production build (/login 2.34 kB, /dashboard 4.02 kB).
+* `node scripts/harness.mjs check`: **Failed as expected** on `src/app/page.tsx` only. That path is granted by lead/config commit 3c7f65f, which is not on main yet; it passes once that PR merges and this branch is updated from main.
+* Manual (in-app browser, `next dev`): 1440 (sidebar and content side by side, no horizontal scroll), 768 (drawer, cards 3+2, table fits), 375 (no page overflow after a fix, table scrolls in its own region, status chip under the date, drawer opens with sign-out). Login checked at 1440 and 375. **Passed.** Real screenshots for the PR still need to be captured by a human.
+* Impeccable: detector run on the shell, dashboard, sign-in and globals.css. It found one issue (thick top accent border on rounded cards), which is fixed (tone dot instead); rerun clean. Design critique was a brief single-context pass, not the full two-agent critique (see Risk section).
+
+Skipped: component rendering tests (jsdom not set up, D12). No backend exists in S1.
 
 ## Risk, security and UX review
 
-* **Shared API risk:** PC-S1-06/07/08 start D5 and will import `useAdapters()`. Mitigation: push the provider and shell first (first commit), post its signature in the PR description and to the team, and keep it backward compatible after merge.
-* **Security:** no credentials, no password field, no network calls; nothing leaves the browser. Stored role is non-authoritative and labeled so. No customer data beyond the synthetic fixtures. Mock code is flagged for removal at S2 release signoff (PC-S3-09).
-* **UX/accessibility:** WCAG AA contrast comes from the approved token pairs; 44 px control height (`--pc-control-min-height`); visible focus; drawer focus management; live region for loading; layout checked at 375/768/1440. Impeccable critique/audit to be run once on the finished shell and recorded here.
-* **Token mapping:** the `@theme inline` names become the team convention. If Mahdi prefers raw `var(--pc-*)` usage, drop the block; nothing else depends on it.
+* Shared API: `useAdapters()` in src/components/layout/adapters-provider.tsx is the interface PC-S1-06/07/08 build on. Screens call `adapters.*` and re-fetch on `dataVersion`. Do not change its shape after merge without telling those owners.
+* Security: no credentials, no password field, no network calls. The stored role is UI-only (sessionStorage, validated against ROLES and cleared if tampered). Mock code is flagged for removal at the S2 release signoff (PC-S3-09).
+* UX: one skip link, `aria-current` in the navigation, the drawer is a native modal `<dialog>` (Esc and backdrop close it, and focus returns to the menu button), loading has a live region, the error has Retry, denied explains the limit. The mock banner is always visible and switches scenarios.
+* Impeccable critique (single context, brief): strengths are data-first hierarchy, repeated honest mock labeling, and states that look deliberate. Open points, deliberately left: summary cards do not link to filtered lists yet (needs PC-S1-07's query params); the sign-in side panel is a placeholder pattern until a licensed photo exists (D09); at 768 the five cards wrap 3+2.
 
 ## Out-of-scope items for the lead (recorded per CLAUDE.md)
 
 1. Resolved 2026-11-22: Reem added `src/app/page.tsx` and `home.spec.ts` to PC-S1-05 (lead/config 3c7f65f). KAN-17 "Allowed file paths" updated to match on 2026-11-22 (at Reem's request).
-2. PC-S1-08 needs to wrap `src/app/technician/layout.tsx` with this provider; that is in Tarek's paths, so Tarek must be told the API once it is pushed.
+2. PC-S1-08 needs to wrap `src/app/technician/layout.tsx` with `<AdaptersProvider>`; that is in Tarek's paths, so Tarek must be told.
+3. `vitest.config.ts` has no `@/` alias, so modules that unit tests load must use relative imports (as src/lib already does). Adding the alias is a one-line shared-config change for a lead PR; not blocking.
 
 ## Developer review guide (assistant updates after every run; see CLAUDE.md)
 
-Review next (file:line and what to check): this plan, especially the provider API, the no-password mock sign-in, the token `@theme` mapping and the route list.
-Developer to fill or decide: merge the lead/config PR before this task's PR.
+Review next (file:line and what to check):
+
+1. src/components/layout/adapters-provider.tsx:19: the shared `useAdapters()` API that the S1 screens will depend on.
+2. src/components/layout/mock-session.ts:46: the stored role is validated and cleared if tampered, and stays non-authoritative.
+3. src/app/globals.css:10: the `@theme inline` token mapping becomes the team convention (Mahdi owns the tokens).
+4. src/features/dashboard/dashboard-view.ts:83: how 401/403/500 and zero data map to signed-out, denied, error and empty.
+5. src/features/dashboard/dashboard-screen.tsx:88: a technician gets the denied panel and no coordinator data is fetched.
+
+Developer to fill or decide:
+
+* Merge the lead/config PR (3c7f65f) first, then update this branch from main and rerun `node scripts/harness.mjs check`.
+* Capture real screenshots at 375/768/1440 of /login and /dashboard for the PR.
+* Tell Tarek to wrap `src/app/technician/layout.tsx` in `<AdaptersProvider>`, and Mahdi/Rand that `useAdapters()` exists.
+* Move KAN-17 to In Review when the PR is submitted.
 
 ## Handoff
 
-Status: In progress (plan self-approved) | Files changed: worklogs/PC-S1-05/plan.md | Next step: implement.
+Status: Review-ready (pending the lead/config merge) | Files changed: src/app/globals.css, src/app/page.tsx, src/app/(auth)/, src/app/(dashboard)/layout.tsx, src/app/(dashboard)/dashboard/, src/components/layout/, src/features/dashboard/, src/app/__e2e__/home.spec.ts, src/app/__e2e__/dashboard.spec.ts | Next step: merge lead/config, update from main, submit the PR from worklogs/PC-S1-05/pr.md.

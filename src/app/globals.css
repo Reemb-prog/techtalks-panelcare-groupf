@@ -1,11 +1,75 @@
 @import "tailwindcss";
+/* Design tokens (PC-S1-02). The single place they enter the app; components use var(--pc-*) or the mapped utilities below. */
+@import "../styles/tokens.css";
 
-/* Base reset only. Design tokens live in src/styles/ (PC-S1-02) and are wired in by PC-S1-05. */
+/*
+ * Token → Tailwind utility mapping (PC-S1-05). Use these names instead of raw palette classes, e.g.
+ * bg-pc-surface, text-pc-muted, border-pc-border, rounded-pc-card, shadow-pc-card.
+ * `inline` keeps the var() reference, so the token stays the single source of truth.
+ */
+@theme inline {
+  --font-sans: var(--pc-font-sans);
+
+  --color-pc-canvas: var(--pc-color-canvas);
+  --color-pc-surface: var(--pc-color-surface);
+  --color-pc-text: var(--pc-color-text);
+  --color-pc-muted: var(--pc-color-text-muted);
+  --color-pc-border: var(--pc-color-border);
+  --color-pc-control-border: var(--pc-color-control-border);
+  --color-pc-primary: var(--pc-color-primary);
+  --color-pc-primary-hover: var(--pc-color-primary-hover);
+  --color-pc-on-primary: var(--pc-color-on-primary);
+  --color-pc-accent: var(--pc-color-accent);
+  --color-pc-focus: var(--pc-color-focus);
+  --color-pc-disabled: var(--pc-color-disabled);
+
+  --color-pc-neutral-bg: var(--pc-status-neutral-bg);
+  --color-pc-neutral-text: var(--pc-status-neutral-text);
+  --color-pc-info-bg: var(--pc-status-info-bg);
+  --color-pc-info-text: var(--pc-status-info-text);
+  --color-pc-warning-bg: var(--pc-status-warning-bg);
+  --color-pc-warning-text: var(--pc-status-warning-text);
+  --color-pc-success-bg: var(--pc-status-success-bg);
+  --color-pc-success-text: var(--pc-status-success-text);
+  --color-pc-danger-bg: var(--pc-status-danger-bg);
+  --color-pc-danger-text: var(--pc-status-danger-text);
+
+  --radius-pc-control: var(--pc-radius-control);
+  --radius-pc-card: var(--pc-radius-card);
+  --radius-pc-panel: var(--pc-radius-panel);
+  --radius-pc-pill: var(--pc-radius-pill);
+
+  --shadow-pc-card: var(--pc-shadow-card);
+  --shadow-pc-overlay: var(--pc-shadow-overlay);
+}
+
 html {
   -webkit-text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--pc-font-sans);
+  font-size: var(--pc-type-body);
+  line-height: var(--pc-line-body);
+  color: var(--pc-color-text);
+  background: var(--pc-color-canvas);
+}
+
+:focus-visible {
+  outline: var(--pc-focus-width) solid var(--pc-color-focus);
+  outline-offset: 2px;
+}
+
+dialog::backdrop {
+  background: rgb(17 39 68 / 45%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
