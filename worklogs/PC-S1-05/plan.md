@@ -33,6 +33,7 @@ PC-S1-01 (KAN-13), PC-S1-02 (KAN-14), PC-S1-03 (KAN-15).
 * src/components/layout/
 * src/features/dashboard/
 * src/app/globals.css
+* src/app/page.tsx and src/app/__e2e__/home.spec.ts (added by Reem 2026-11-22 in lead/config commit 3c7f65f; that lead PR must merge before this task's PR or `harness check` flags them)
 * plus my own E2E spec in src/app/__e2e__/ (shared folder, D12)
 
 ## Routes and files
@@ -44,6 +45,7 @@ PC-S1-01 (KAN-13), PC-S1-02 (KAN-14), PC-S1-03 (KAN-15).
 | `src/components/layout/adapters-provider.tsx` | `"use client"`. Creates **one** `createMockAdapters()` per provider mount, rehydrates the stored role via `controls.signInAs(role)` and scenario via `controls.setScenario`, and exposes `useAdapters()` → `{ adapters, session, signInAs(role), signOut(), scenario, setScenario() }`. The only file that touches `controls`. **Shared API** for PC-S1-06/07 (under the dashboard layout) and PC-S1-08 (wraps `src/app/technician/layout.tsx` itself). |
 | `src/components/layout/app-shell.tsx`, `sidebar-nav.tsx`, `top-bar.tsx`, `mock-banner.tsx`, `nav-items.ts` | Shell. Skip link to `#main`; sidebar with Dashboard, Customers (`/customers`), Systems (`/systems`), Maintenance (`/maintenance`), Dispatch (`/jobs`); active item with `aria-current="page"`; top bar with search, signed-in name + role chip, "Mock data" scenario select and Sign out. At <1024 px the sidebar becomes a menu button + dialog drawer (focus moved in, Esc and backdrop close, focus returned to the button). |
 | `src/app/(auth)/login/page.tsx` (+ `src/features/dashboard/login/*` if it grows) | Sign-in page per blueprint sections: 1 brand/promise, 2 card with two buttons "Continue as demo coordinator" / "Continue as demo technician", 3 a persistent **"Mock sign-in: no real authentication, nothing is saved"** notice, 4 privacy footer. No password field: the acceptance asks for simulated role selection, and a fake password field invites a real password. No photo (no rights-verified asset in the manifest); a token-colored surface panel instead. |
+| `src/app/page.tsx` | `/` redirects (server `redirect`) to `/login`; the login page sends an already signed-in tab on to its role home. `home.spec.ts` is updated to assert the redirect instead of the scaffold text. |
 | `src/app/(dashboard)/layout.tsx` | Wraps children in the provider and shell. Signed out → `router.replace("/login")` with a "Checking session" placeholder (no flash of the shell). |
 | `src/app/(dashboard)/dashboard/page.tsx` + `src/features/dashboard/*` | Blueprint sections: 1 today header (business date, Asia/Beirut) and primary action "View dispatch" → `/jobs`; 2 five summary cards from `dashboard.getStats()` (upcoming 7 days, overdue, unassigned, in progress, completed 30 days), each linking to its filtered list where that screen exists; 3 upcoming/overdue jobs table from `dispatch.listJobs({ status: [scheduled, assigned, in_progress], to: today+6 })`, overdue first, with status chips; 4 expiring warranties list; 5 state panel. |
 | `src/features/dashboard/dashboard-view.ts` | Pure view-model: maps `ApiResult`s to `loading / ready / empty / error / denied / signed-out`, orders jobs (overdue first, then date), labels and chip tone per `JobStatus` (blueprint: neutral = scheduled/unassigned, info = assigned/in progress, success = completed, danger = overdue, warning = warranty due). |
@@ -71,7 +73,6 @@ permission-denied state ("The dashboard is for coordinators") with a link back t
 * Route groups `(auth)` and `(dashboard)` have separate layouts, so the provider remounts between them; persistence across that boundary is the stored role/scenario only. Mock edits made on one screen survive navigation inside the dashboard layout but are lost on reload. That is acceptable for S1 and stated in the mock banner.
 * `sessionStorage` is per tab and cleared on tab close (intended: no lingering "login"). Access is wrapped in try/catch (private mode) and falls back to in-memory.
 * The stored role is UI convenience only; the mock banner and code comments repeat that S2 derives the role on the server.
-* `src/app/page.tsx` (the `/` scaffold page) is owned by PC-S1-01 and is outside my paths, so `/` will not redirect to `/login`. See "Out-of-scope items for the lead".
 
 ## Acceptance criteria
 
@@ -98,7 +99,7 @@ Task test hint: Playwright mock route and manual 375px/768px/1440px inspection
   * Mobile project: menu button opens the drawer, Esc closes it and focus returns to the button.
   * States via the "Mock data" select: empty (zero counts, empty messages), error (message + Retry), denied (technician sign-in → denied panel on `/dashboard`).
 * Not tested: component rendering in jsdom (not set up, D12); visual layout (manual screenshots instead).
-* Existing `home.spec.ts` stays untouched and must keep passing.
+* `home.spec.ts`: `/` lands on `/login` with the mock notice visible (replaces the scaffold-text assertion).
 
 ## Evidence (Passed/Failed/Not run/Blocked; never claim an unexecuted check)
 
@@ -115,13 +116,13 @@ Manual checks (UI 375/768/1440, keyboard) and screenshot/log link: NOT CAPTURED
 
 ## Out-of-scope items for the lead (recorded per CLAUDE.md)
 
-1. `/` still shows the PC-S1-01 scaffold page. Making it redirect to `/login` (or `/dashboard`) touches `src/app/page.tsx` and `src/app/__e2e__/home.spec.ts`, owned by PC-S1-01. Options: add those two paths to PC-S1-05 in `config/work-items.json` via a lead/config PR, or a separate small lead PR after this merges.
+1. Resolved 2026-11-22: Reem added `src/app/page.tsx` and `home.spec.ts` to PC-S1-05 (lead/config 3c7f65f). The Jira KAN-17 "Allowed file paths" list still needs the same two paths (manual, human-controlled Jira edit).
 2. PC-S1-08 needs to wrap `src/app/technician/layout.tsx` with this provider; that is in Tarek's paths, so Tarek must be told the API once it is pushed.
 
 ## Developer review guide (assistant updates after every run; see CLAUDE.md)
 
 Review next (file:line and what to check): this plan, especially the provider API, the no-password mock sign-in, the token `@theme` mapping and the route list.
-Developer to fill or decide: get Mahdi's plan approval (fill "Plan review" above); decide on out-of-scope item 1.
+Developer to fill or decide: get Mahdi's plan approval (fill "Plan review" above); merge the lead/config PR before this task's PR; add the two paths to KAN-17 in Jira.
 
 ## Handoff
 
