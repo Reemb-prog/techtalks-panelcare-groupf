@@ -39,7 +39,7 @@ All five KAN-17 acceptance items are covered.
 
 * Plan: worklogs/PC-S1-05/plan.md. Self-approved by Reem (lead) on 2026-11-22 as a recorded exception to D11's separate plan approval, so this PR review is the gate. Please look closely at the provider API, the token mapping and the mock sign-in.
 * Dependencies merged and Done: PC-S1-01 (KAN-13), PC-S1-02 (KAN-14), PC-S1-03 (KAN-15). Contract: docs/CONTRACTS.md (unchanged). Design: docs/DESIGN_BLUEPRINT.md page sections for Sign in and Coordinator dashboard.
-* Scope change: `src/app/page.tsx` and `src/app/__e2e__/home.spec.ts` were added to PC-S1-05 in the lead/config PR (commit 3c7f65f), and KAN-17 was updated to match. **That lead PR merges before this one.**
+* Scope change: `src/app/page.tsx` and `src/app/__e2e__/home.spec.ts` were added to PC-S1-05 in lead PR #17 (commit 3c7f65f, merged to main as deaf24b), and KAN-17 was updated to match. This branch includes that merge.
 
 ## Test evidence (do not claim unexecuted checks)
 
@@ -61,12 +61,12 @@ Tests added (docs/TESTING.md), per layer and paths covered (happy / misuse / err
 
 Commands, environment and exact result for lint / TypeScript / tests / build (full `node scripts/ci.mjs` run):
 
-* Windows 11, Node 23.1, 2026-11-22, on main 176b24a.
+* Windows 11, Node 23.1, 2026-11-22. Final run on this branch after merging main deaf24b.
 * `node scripts/ci.mjs`: **Passed**. Harness validate; lint; typecheck; Vitest 11 files / 118 tests (100 existing + 18 new); `next build` (/login 2.34 kB, /dashboard 4.02 kB).
-* `npx playwright test`, cold dev server: **Passed**, 13 passed / 1 skipped. The drawer test only runs on mobile. Same result twice.
+* `npx playwright test`, cold dev server: **Passed**, 13 passed / 1 skipped. The drawer test only runs on mobile. Same result on three runs, the last after merging main.
 * `--repeat-each=2`: 26 passed / 2 skipped.
 * One earlier affected run failed the first sign-in test on both projects: a cold `next dev` compile of /dashboard took longer than 5 s. That navigation now waits up to 20 s.
-* `node scripts/harness.mjs check` currently flags `src/app/page.tsx`. It passes once the lead/config PR (3c7f65f) is on main and this branch is updated. **CI's "Branch and file ownership" step will fail until then.**
+* `node scripts/harness.mjs check`: **Passed** (24 changed paths, all within scope).
 
 Manual desktop/mobile or Impeccable critique output and screenshots for UI:
 
@@ -117,11 +117,11 @@ Result and follow-up: **[FILL: Mahdi's review result and any follow-ups]**
 Checklist:
 
 * [x] Plan written before code (self-approved by the lead as a recorded D11 exception; this review is the gate)
-* [x] Work within allowed paths and acceptance tests (root page path granted by lead/config 3c7f65f)
+* [x] Work within allowed paths and acceptance tests (root page path granted by lead PR #17)
 * [x] Tests added for every behavior change (happy/misuse/error where relevant), without duplicate or snapshot-heavy tests
 * [x] Actual checks passed or explicitly marked Blocked
 * [x] No secrets/PII/unlicensed imagery
 * [ ] Jira linked, reviewer requested, evidence captured (screenshots pending)
-* [ ] Rebase/retest after main changed (after the lead/config merge)
+* [x] Rebase/retest after main changed (merged main deaf24b; check, CI and E2E rerun)
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)

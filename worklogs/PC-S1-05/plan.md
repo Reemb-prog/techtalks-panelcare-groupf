@@ -108,7 +108,8 @@ Run on 2026-11-22, Windows 11, Node 23.1, branch s1/reem/pc-s1-05 on main 176b24
 
 * Affected run, `node scripts/harness.mjs test`: unit (related) **Passed** 3 files / 18 tests. E2E **Failed** 2 of 14 on the first run (the sign-in test, both projects): a cold `next dev` compile of /dashboard ran past the 5 s assertion timeout. That navigation now has a 20 s timeout. Reruns: `--repeat-each=2` 26 passed / 2 skipped; cold full run (no dev server running) 13 passed / 1 skipped, twice.
 * Full run, `node scripts/ci.mjs`: **Passed**. Harness validate, lint, typecheck, Vitest 11 files / 118 tests (100 existing + 18 new), production build (/login 2.34 kB, /dashboard 4.02 kB).
-* `node scripts/harness.mjs check`: **Failed as expected** on `src/app/page.tsx` only. That path is granted by lead/config commit 3c7f65f, which is not on main yet; it passes once that PR merges and this branch is updated from main.
+* `node scripts/harness.mjs check`: **Passed** after merging main deaf24b (lead PR #17), 24 changed paths. Earlier it flagged `src/app/page.tsx` only, before that PR merged.
+* After merging main deaf24b: `node scripts/ci.mjs` **Passed** (118 tests, build); Playwright cold run **Passed** 13 / 1 skipped.
 * Manual (in-app browser, `next dev`): 1440 (sidebar and content side by side, no horizontal scroll), 768 (drawer, cards 3+2, table fits), 375 (no page overflow after a fix, table scrolls in its own region, status chip under the date, drawer opens with sign-out). Login checked at 1440 and 375. **Passed.** Real screenshots for the PR still need to be captured by a human.
 * Impeccable: detector run on the shell, dashboard, sign-in and globals.css. It found one issue (thick top accent border on rounded cards), which is fixed (tone dot instead); rerun clean. Design critique was a brief single-context pass, not the full two-agent critique (see Risk section).
 
@@ -139,11 +140,10 @@ Review next (file:line and what to check):
 
 Developer to fill or decide:
 
-* Merge the lead/config PR (3c7f65f) first, then update this branch from main and rerun `node scripts/harness.mjs check`.
 * Capture real screenshots at 375/768/1440 of /login and /dashboard for the PR.
 * Tell Tarek to wrap `src/app/technician/layout.tsx` in `<AdaptersProvider>`, and Mahdi/Rand that `useAdapters()` exists.
 * Move KAN-17 to In Review when the PR is submitted.
 
 ## Handoff
 
-Status: Review-ready (pending the lead/config merge) | Files changed: src/app/globals.css, src/app/page.tsx, src/app/(auth)/, src/app/(dashboard)/layout.tsx, src/app/(dashboard)/dashboard/, src/components/layout/, src/features/dashboard/, src/app/__e2e__/home.spec.ts, src/app/__e2e__/dashboard.spec.ts | Next step: merge lead/config, update from main, submit the PR from worklogs/PC-S1-05/pr.md.
+Status: Review-ready | Files changed: src/app/globals.css, src/app/page.tsx, src/app/(auth)/, src/app/(dashboard)/layout.tsx, src/app/(dashboard)/dashboard/, src/components/layout/, src/features/dashboard/, src/app/__e2e__/home.spec.ts, src/app/__e2e__/dashboard.spec.ts | Next step: submit the PR from worklogs/PC-S1-05/pr.md, request Mahdi.
