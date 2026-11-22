@@ -1,3 +1,4 @@
+<!-- The assistant writes this whole description (worklogs/PC-SN-XX/pr.md, CLAUDE.md). Do not submit while any [FILL: ...] or template prompt remains. -->
 # PanelCare PR
 
 Local task ID: PC-SN-XX

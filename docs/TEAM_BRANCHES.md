@@ -35,7 +35,7 @@ git commit -m "feat(registry): build customer and system forms"
 git push -u origin s1/mahdi/pc-s1-06
 \`\`\`
 
-Open a PR targeting **main**, mention both local ID and **actual Jira key**, attach proof, request non-author reviewer, fix feedback, merge, then mark Jira Done once tested. After merging, delete obsolete remote/local task branch if it is safely merged and no one is using it; never force delete teammate work.
+When the task is review-ready, Claude writes the full PR title and description into \`worklogs/<ID>/pr.md\` and gives you the compare link. Paste it, replace every \`[FILL: ...]\` it lists, request the non-author reviewer and submit. Never open an empty or draft PR. Then fix feedback, merge, then mark Jira Done once tested. After merging, delete obsolete remote/local task branch if it is safely merged and no one is using it; never force delete teammate work.
 
 ## Integration and file ownership
 
@@ -50,7 +50,7 @@ Open a PR targeting **main**, mention both local ID and **actual Jira key**, att
 ## Practical workflow
 
 1. Jira To Do → branch start; plan written (and approved by a human when the task needs it, per D11).
-2. Jira In Progress → implementation, tests, self-review and a draft PR.
+2. Jira In Progress → implementation, tests, self-review and the branch pushed (no draft PR).
 3. Jira In Review → reviewer checks diff, scope, design, negative tests and PR evidence.
 4. Jira Testing → merged to main, integration regression and preview validated.
 5. Jira Done → acceptance criteria and evidence truly satisfied. A failed check goes back to In Progress, not to Done.

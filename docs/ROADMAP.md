@@ -16,7 +16,7 @@ This is the **approved four-week plan** (D03, CR-01 in [DECISIONS.md](DECISIONS.
 
 **D5–D6:** each developer branches **from updated main** for their UI package. Reem builds the coordinator shell and mock login and wires the PC-S1-02 tokens into \`src/app/globals.css\` (PC-S1-05, **PR D6**, reviewed by Mahdi).
 
-**D5–D10:** registry screens by Mahdi (PC-S1-06), maintenance/dispatch mock by Rand (PC-S1-07), technician mobile UI by Tarek (PC-S1-08). Draft PR within a day of starting; **review-ready PR by D10** with screenshots at 375, 768 and 1440 px, states, keyboard testing and Impeccable critique.
+**D5–D10:** registry screens by Mahdi (PC-S1-06), maintenance/dispatch mock by Rand (PC-S1-07), technician mobile UI by Tarek (PC-S1-08). Push the branch within a day of starting; **review-ready PR by D10** with screenshots at 375, 768 and 1440 px, states, keyboard testing and Impeccable critique.
 
 **D11–D12:** integration review and polish. **D12 PR:** Reem posts S1 UX signoff and frozen contracts (PC-S1-09); sprint demo and retrospective. Do not claim backend is built.
 
@@ -64,7 +64,7 @@ Deferred items cannot be started with \`harness start\` until the lead re-plans 
 
 Daily 15-minute standup: yesterday, today, blocker, PR review requested. Reem updates Jira statuses and dependency links. Mid-sprint (around D6): design/API review and PR integration. Sprint review and retrospective on D12; incomplete tasks return to backlog or get re-estimated, never auto-marked done. S2 is 37 points against roughly 32 points of capacity: re-estimate at S2 planning.
 
-**Pull request checkpoints:** open a **draft** once the first thin vertical slice works, normally within 24 hours of starting; mark review-ready by the task's \`prDay\`; expect review within one day; merge only after checks and at least one non-author human approval. No 500-file end-of-sprint PRs.
+**Pull request checkpoints:** push the branch once the first thin vertical slice works, normally within 24 hours of starting; open the PR, fully written by the assistant, once review-ready and by the task's \`prDay\` (no drafts or unfilled templates); expect review within one day; merge only after checks and at least one non-author human approval. No 500-file end-of-sprint PRs.
 
 ## Work item sizing and coupling
 

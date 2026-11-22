@@ -177,7 +177,7 @@ function writePlan() {
   const contents = [
     '# ' + item.id + ': ' + item.title, '',
     'Sprint: ' + item.sprint + ' | Owner: ' + item.owner + ' | Reviewer: ' + item.reviewer,
-    'Jira key: ' + (item.jiraKey || 'TO CONFIRM') + ' | Draft PR: TO CONFIRM | Planned start D' + item.startDay + ', review-ready day: D' + item.prDay,
+    'Jira key: ' + (item.jiraKey || 'TO CONFIRM') + ' | PR: not opened (assistant writes it when review-ready) | Planned start D' + item.startDay + ', review-ready day: D' + item.prDay,
     'Plan review: Pending | Approver: TO CONFIRM | Date: TO CONFIRM', '',
     '## Goal and scope', item.title, '',
     '## Dependencies to confirm merged', item.dependsOn.join(', ') || '(none)', '',
@@ -265,6 +265,10 @@ function check(base) {
     fail('Behavior files changed without any test change (docs/TESTING.md):\n' + behavior.map((file) => '  ' + file).join('\n') +
       '\nAdd tests, or add a line "Test exemption: <reason>" to ' + path.relative(root, plan) + ' for the reviewer to judge.');
   }
+  const prFile = path.join(root, 'worklogs', item.id, 'pr.md');
+  const fills = fs.existsSync(prFile) ? (fs.readFileSync(prFile, 'utf8').match(/\[FILL:[^\]]*\]/g) || []) : null;
+  if (fills === null) console.log('PR description: worklogs/' + item.id + '/pr.md not written yet; the assistant writes it when review-ready.');
+  else if (fills.length) console.log('PR description has ' + fills.length + ' [FILL] item(s) the developer must replace before submitting:\n' + fills.map((fill) => '  ' + fill).join('\n'));
   console.log('Branch/sprint/owner CHECK OK for ' + item.id + '. Changed paths: ' + files.length + '.');
   console.log('Reminder: manual Jira dependency confirmation, plan approval, reviewer and actual test evidence are not machine-verified.');
 }
