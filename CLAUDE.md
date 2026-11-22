@@ -10,7 +10,7 @@ You are working as **one developer assistant on one assigned task branch** in a 
 4. Run \`node scripts/harness.mjs plan\` if the branch does not yet have a plan. Before coding, complete \`worklogs/<LOCAL_ID>/plan.md\`: intended result, files and contracts, UX sections/images if relevant, edge cases, tests, security, risk and reviewer. **Planning precedes implementation, for every phase and work item.** Plan approval is tiered (D11): for a routine task inside its own allowed paths, the owner records the plan as self-approved and proceeds; the non-author PR review is the gate. A separate human plan approval (Reem, or a non-author for Reem's own work) is required before coding when the task touches an API contract, schema/migrations/RLS, auth or role model, recurrence policy, design system/tokens, provider, spend, deployment/release or shared files.
 5. Implement only the assigned task and allowed file areas. If shared files, migrations, contracts, design tokens or architecture must change, stop and coordinate a separate lead-owned PR and assess downstream impact.
 6. **Write tests with the code, never after.** Follow [docs/TESTING.md](docs/TESTING.md) (D12): lowest layer that catches the bug (unit, integration, E2E), covering the happy, misuse and error paths that apply, without overtesting. After each change run only affected tests: \`node scripts/harness.mjs test\`. Before review, once: \`node scripts/harness.mjs check\` then \`node scripts/ci.mjs\`. For UI, manually inspect desktop/mobile and run the Impeccable critique/audit once installed; for backend, independently prove authorization, validations, scheduler and persistence behaviors. Do not call mocked UI a real backend.
-7. Update only your own \`worklogs/<LOCAL_ID>/plan.md\` with tests actually run, status, review guide and handoff. Create PR using the template. Only after review and merged evidence should Jira move to Done. The team lead updates shared \`progress.md\`, \`session-handoff.md\`, roadmap gates and any global work-item revisions in an integration PR.
+7. Update only your own \`worklogs/<LOCAL_ID>/plan.md\` with tests actually run, status, review guide and handoff. **You write the PR, the developer does not** (below). Open it only when it is review-ready; never a draft or an unfilled template. Only after review and merged evidence should Jira move to Done. The team lead updates shared \`progress.md\`, \`session-handoff.md\`, roadmap gates and any global work-item revisions in an integration PR.
 8. **End every run with a review guide** (below). Developers rarely edit by hand; they review your changes in the chat, so tell them exactly what to look at and what only they can do.
 
 ## End-of-run review guide (every run that changed files)
@@ -20,9 +20,18 @@ Developers work through Claude Code or Codex chats and review as you go. Close e
 1. **What I changed and why**: each file (as a clickable link) with one line on the change. Mention anything deliberately not done.
 2. **Tests**: tests added per layer and which paths they cover (happy / misuse / error); the commands actually run and their results. Say plainly what was not run and why.
 3. **Review these first**: at most five \`file:line\` spots where a human judgment matters most (security or role checks, contract shapes, tricky logic, assumptions you made, UI states to eyeball), each with what to check.
-4. **You need to do or decide**: only what the assistant cannot: approvals, Jira moves, real screenshots at 375/768/1440, manual browser or device checks, credentials, choices between options. Name the file or field to fill when there is one.
+4. **You need to do or decide**: only what the assistant cannot: approvals, Jira moves, real screenshots at 375/768/1440, manual browser or device checks, credentials, choices between options. Name the file or field to fill when there is one, including every \`[FILL: ...]\` left in the PR description.
 
 Keep it scannable; no restating of the diff line by line.
+
+## Pull requests are written by the assistant
+
+Developers paste PR text rather than write it, so an empty or draft PR gets submitted by mistake. When the task is review-ready:
+
+1. Write the complete PR title and description from [.github/PULL_REQUEST_TEMPLATE.md](.github/PULL_REQUEST_TEMPLATE.md), filled with real content from the worklog, the diff and the commands actually run. No template prompts or blank sections remain.
+2. Save it as \`worklogs/<LOCAL_ID>/pr.md\` (first line \`# <PR title>\`) so it is reviewed with the diff. For \`lead/*\` branches, give it in the chat instead.
+3. Anything only a human can supply (reviewer result, a screenshot, a manual check outcome, a Jira URL you could not read) is written as \`**[FILL: what to put here]**\` and listed under "You need to do or decide". Leave nothing else for the developer to write.
+4. Give the developer the title, the compare link (\`https://github.com/<owner>/<repo>/compare/main...<branch>?expand=1\`) and the instruction: paste, replace every \`[FILL: ...]\`, pick the assigned reviewer, submit. Push the branch early so work is visible, but do not open a PR before this point.
 
 ## Invariants
 

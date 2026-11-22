@@ -45,7 +45,7 @@ Definition of Done: human review + passing test evidence + merged main + integra
 
 ## Daily and sprint maintenance
 
-* Daily: Claude reads Jira actual state; developer selects one ready issue, runs harness CLI for that issue, logs branch and draft PR in Jira.
+* Daily: Claude reads Jira actual state; developer selects one ready issue, runs harness CLI for that issue, logs the branch in Jira, then the PR link once the review-ready PR is opened.
 * Review-ready day: Claude links PR and evidence; reviewer moves/labels In Review, not Done.
 * After merge and demonstrated acceptance: reviewer or lead moves through Testing to Done and attaches evidence links.
 * Sprint D10: review goal, actual Done items and carryovers; retro documents blockers and one concrete improvement. Do not delete unfinished issues or silently reset story points.
