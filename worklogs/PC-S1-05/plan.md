@@ -116,13 +116,13 @@ Manual checks (UI 375/768/1440, keyboard) and screenshot/log link: NOT CAPTURED
 
 ## Out-of-scope items for the lead (recorded per CLAUDE.md)
 
-1. Resolved 2026-11-22: Reem added `src/app/page.tsx` and `home.spec.ts` to PC-S1-05 (lead/config 3c7f65f). The Jira KAN-17 "Allowed file paths" list still needs the same two paths (manual, human-controlled Jira edit).
+1. Resolved 2026-11-22: Reem added `src/app/page.tsx` and `home.spec.ts` to PC-S1-05 (lead/config 3c7f65f). KAN-17 "Allowed file paths" updated to match on 2026-11-22 (at Reem's request).
 2. PC-S1-08 needs to wrap `src/app/technician/layout.tsx` with this provider; that is in Tarek's paths, so Tarek must be told the API once it is pushed.
 
 ## Developer review guide (assistant updates after every run; see CLAUDE.md)
 
 Review next (file:line and what to check): this plan, especially the provider API, the no-password mock sign-in, the token `@theme` mapping and the route list.
-Developer to fill or decide: get Mahdi's plan approval (fill "Plan review" above); merge the lead/config PR before this task's PR; add the two paths to KAN-17 in Jira.
+Developer to fill or decide: get Mahdi's plan approval (fill "Plan review" above); merge the lead/config PR before this task's PR.
 
 ## Handoff
 
