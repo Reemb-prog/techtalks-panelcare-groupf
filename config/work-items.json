@@ -80,7 +80,7 @@
     "startDay": 5,
     "prDay": 6,
     "dependsOn": ["PC-S1-01","PC-S1-02","PC-S1-03"],
-    "paths": ["src/app/(auth)/","src/app/(dashboard)/layout.tsx","src/app/(dashboard)/dashboard/","src/components/layout/","src/features/dashboard/","src/app/globals.css"],
+    "paths": ["src/app/(auth)/","src/app/(dashboard)/layout.tsx","src/app/(dashboard)/dashboard/","src/components/layout/","src/features/dashboard/","src/app/globals.css","src/app/page.tsx","src/app/__e2e__/home.spec.ts"],
     "acceptance": ["Dashboard has meaningful overview and navigable sidebar, search entry and statuses","Simulated role selection is visibly labeled mock, not production login","Keyboard/mobile navigation and loading/empty/error states work","Wire the PC-S1-02 tokens from src/styles/ into src/app/globals.css (single import) after PC-S1-01 and PC-S1-02 merge"],
     "test": "Playwright mock route and manual 375px/768px/1440px inspection",
     "planChange": "Unchanged scope; days rescaled to the 12-day calendar sprint."
