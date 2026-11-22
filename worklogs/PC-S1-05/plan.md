@@ -2,15 +2,16 @@
 
 Sprint: S1 | Owner: reem | Reviewer: mahdi
 Jira key: KAN-17 | PR: not opened (assistant writes it when review-ready) | Planned start D5, review-ready day: D6
-Plan review: Pending (human approval required, see "Approval tier") | Approver: Mahdi (non-author, Reem's own task) | Date: TO CONFIRM
+Plan review: Self-approved by Reem (lead) | Approver: Reem | Date: 2026-11-22
 
 ## Approval tier (D11)
 
-This task needs a **human plan approval before coding**, not self-approval: it defines the mock auth/role flow, the shared
-dashboard layout every coordinator screen renders inside, the adapter provider that PC-S1-06/07/08 consume, and it wires the
-design tokens into global CSS. Because Reem is the owner, the approver is a non-author: Mahdi (also the PR reviewer, and the
-PC-S1-02 token owner). Starting before the configured D5 (Nov 24) is a lead decision recorded by Reem on 2026-11-22; all
-three dependencies are merged and Done in Jira.
+D11 would normally ask for a separate human plan approval here, because the task sets up the mock auth/role flow, the shared
+dashboard layout, the adapter provider PC-S1-06/07/08 consume, and the token wiring. **Lead exception (Reem, 2026-11-22):**
+the plan is self-approved; Mahdi's non-author PR review is the gate, and he should give the provider API, the token
+`@theme` mapping and the mock sign-in extra attention in that review. Starting before the configured D5 (Nov 24) is also a
+lead decision; all three dependencies are merged and Done in Jira. Merge order: the lead/config PR (path change, 3c7f65f)
+merges before this task's PR.
 
 ## Goal and scope
 
@@ -122,8 +123,8 @@ Manual checks (UI 375/768/1440, keyboard) and screenshot/log link: NOT CAPTURED
 ## Developer review guide (assistant updates after every run; see CLAUDE.md)
 
 Review next (file:line and what to check): this plan, especially the provider API, the no-password mock sign-in, the token `@theme` mapping and the route list.
-Developer to fill or decide: get Mahdi's plan approval (fill "Plan review" above); merge the lead/config PR before this task's PR.
+Developer to fill or decide: merge the lead/config PR before this task's PR.
 
 ## Handoff
 
-Status: Planned, awaiting human plan approval | Files changed: worklogs/PC-S1-05/plan.md | Next step: Mahdi approves the plan, then implement.
+Status: In progress (plan self-approved) | Files changed: worklogs/PC-S1-05/plan.md | Next step: implement.
