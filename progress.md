@@ -19,13 +19,14 @@ Verified 2026-11-22 on lead/config (main 9ba5934 plus the Next.js upgrade): `nod
 
 | Item | Jira | Owner | PR day | Note |
 | --- | --- | --- | --- | --- |
-| PC-S1-05 Coordinator shell and mock login | KAN-17 In Progress | Reem | D6 (Nov 25) | Dependencies merged; no task branch pushed yet. Earliest start in config is D5 (Nov 24) |
+| PC-S1-05 Coordinator shell and mock login | KAN-17 In Progress | Reem | D6 (Nov 25) | Branch s1/reem/pc-s1-05 pushed with plan (started Nov 22, ahead of D5, lead decision); awaiting Mahdi's plan approval before coding |
 
 ## Decisions and process changes this sprint
 
 * D04 (single company, two roles) and D05 (Asia/Beirut, month-end clamp, half-open 90-day window) approved and encoded in the frozen contract.
 * D12 testing and review policy (docs/TESTING.md): tests ship with every behavior change; affected-only runs while iterating; assistants end each run with a developer review guide.
 * PRs are written in full by the assistant (CLAUDE.md): no drafts or unfilled templates; only human-only details are left as `[FILL: ...]`.
+* PC-S1-05 scope (2026-11-22, Reem): adds `src/app/page.tsx` and `src/app/__e2e__/home.spec.ts` so `/` can redirect into the mock sign-in instead of showing the PC-S1-01 scaffold. PC-S1-01 is Done; no other task owns these paths.
 * Next.js upgraded 15.5.4 → 15.5.29 security backport (critical advisories cleared). Deferred advisories are listed in session-handoff.md.
 
 ## Failed or blocked
