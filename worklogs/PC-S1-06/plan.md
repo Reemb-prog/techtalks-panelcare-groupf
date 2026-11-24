@@ -1,8 +1,8 @@
 # PC-S1-06: Customer, site, system and component registry screens
 
 Sprint: S1 | Owner: mahdi | Reviewer: tarek
-Jira key: KAN-18 | PR: not opened (assistant writes it when review-ready) | Planned start D5, review-ready day: D10
-Plan review: Pending | Approver: Reem W. Basho | Date: pending
+Jira key: KAN-18 | Plan PR: #19 (merged) | Implementation PR: see pr.md | Planned start D5, review-ready day: D10
+Plan review: Approved. Reem merged plan PR #19 and Mahdi confirmed approval to proceed.
 
 ## Goal and scope
 Customer, site, system and component registry screens
@@ -25,9 +25,9 @@ PC-S1-01, PC-S1-02, PC-S1-03
 5. Add focused Vitest tests for registry form validation/error mapping and a Playwright simulated registry journey under `src/app/__e2e__/`. Cover create/list/detail, serial conflict, replacement history, and empty/slow/error/denied scenario behavior. Run the affected harness, scope check, and full CI.
 
 ## Acceptance criteria
-* [ ] Create/list/detail UI for customer → site → system → component with validated forms
-* [ ] Expose serial numbers, install date, warranty expiry and replacement history
-* [ ] Empty, invalid, slow, duplicate serial and error mocks handled without fake persisted success
+* [x] Create/list/detail UI for customer → site → system → component with validated forms
+* [x] Expose serial numbers, install date, warranty expiry and replacement history
+* [x] Empty, invalid, slow, duplicate serial and error mocks handled without fake persisted success
 
 ## Tests (docs/TESTING.md: lowest layer that catches the bug; happy, misuse and error paths)
 Task test hint: Vitest form validations; Playwright simulated registry journey
@@ -37,16 +37,16 @@ Task test hint: Vitest form validations; Playwright simulated registry journey
 * Skipped paths, with one-line reason: none
 
 ## Evidence (Passed/Failed/Not run/Blocked; never claim an unexecuted check)
-Affected run, node scripts/harness.mjs test: NOT RUN
-Full run before review, node scripts/ci.mjs: NOT RUN
-Manual checks (UI 375/768/1440, keyboard) and screenshot/log link: NOT CAPTURED
+Affected run against the local production build: Passed, 3 Vitest registry cases and 22 Playwright cases (2 project-specific skips).
+Full CI: Failed on the pre-existing dashboard date punctuation assertion (120 passed, 1 failed) under Node 22 and 24. Reproduced against unchanged main and in GitHub Actions for plan PR #19. Lint, types, and standalone production build passed.
+Visually reviewed the Customers list with Playwright screenshots at [375](screenshots/registry-375.png), [768](screenshots/registry-768.png), and [1440](screenshots/registry-1440.png) px. Verified no horizontal document overflow and visible Tab focus at each width. Playwright also verified first-invalid-field focus.
 
 ## Risk, security and UX review
-Adapter contract is fixed. Read site and component details via parent-scoped responses. Rights-cleared production photos are unnecessary. Impeccable critique pending implementation.
+Adapter contract is fixed. Read site and component details via parent-scoped responses. Rights-cleared production photos are unnecessary. Impeccable CLI 4.10.0 source scan reported no findings across five registry source files. Source mode cannot evaluate rendered contrast or element geometry. Screenshot review confirmed the primary action, search, and cards are visible and legible at all three widths.
 
 ## Developer review guide (assistant updates after every run; see CLAUDE.md)
-Review Implementation plan for nested navigation, use of the existing adapter, and mock error states.
-Record human plan approval on KAN-18 before feature coding, as the Jira gate requires.
+Review `src/features/registry/registry-screen.tsx:53` for load/error isolation, `:167` for optional component fields during registration, `:256` for replacement history, and `src/components/registry/registry-form.tsx:32` for validation, retries and submit locking.
+Tarek reviews the implementation. The lead should track the dashboard date assertion separately since it predates and lies outside PC-S1-06. Verify integration on main before moving KAN-18 to Done.
 
 ## Handoff
-Status: Planned | Files changed: task plan only | Next step: obtain plan review
+Status: Implementation complete on task branch. PR text is in pr.md. Baseline CI failure is documented for the lead. Review and main integration are pending.
