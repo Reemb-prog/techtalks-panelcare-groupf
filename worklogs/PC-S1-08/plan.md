@@ -3,9 +3,9 @@
 Sprint: S1 | Owner: Tarek | Reviewer: Mahdi
 Jira: [KAN-20](https://techtalks-panelcare.atlassian.net/browse/KAN-20) | PR: not opened
 Planned start: D5 (Nov 24, 2026) | Review-ready target: D10 (Nov 29, 2026)
-Branch: `s1/tarek/pc-s1-08` | Base: `49b91e4`
+Branch: `s1/tarek/pc-s1-08` | Base for Phase 1: `04b091d`
 Plan prepared: Nov 25, 2026 | Owner plan approval: Tarek, Nov 25, 2026
-Current implementation authorization: Phase 1 only, once gates are satisfied
+Current implementation authorization: Phase 1 only
 
 ## Goal and scope
 
@@ -29,18 +29,15 @@ The lead’s [progress log](../../progress.md) records PC-S1-01 through PC-S1-04
 Done. Live Jira was unavailable during the preflight. Confirm KAN-20’s assignment,
 sprint and readiness in Jira before implementation.
 
-- **Permission to implement:** Tarek reports that Reem gave him permission to
-  proceed after the technician design PR merged. The original message and date
-  were unavailable for inspection. Git confirms the design and follow-up merges.
-- **Visual direction:** Pending verification. The technician design and its
-  [worklog](../PC-S1-04/plan.md#handoff) still list this approval as pending.
-  The [lead progress log](../../progress.md) requires Reem’s visual-direction
-  approval before PC-S1-08 screen work. Record the original message if it also
-  approves the technician visual direction, or record Reem’s clarification.
+- **Visual direction and permission to implement:** Reem approved both, as
+  confirmed by Tarek in the PC-S1-08 conversation on Nov 25, 2026:
+  “Reem has confirmed the technician UI visual direction and approved
+  proceeding with implementation.” A direct link to Reem’s original message
+  and the date of that message were unavailable.
 - **Plan approval:** Tarek approved the plan and the task-owned Playwright path
   on Nov 25, 2026. This is routine owner self-approval under
   [D11](../../docs/DECISIONS.md#decisions-approvals-and-material-change-control).
-  Authorization to start is limited to Phase 1 after the start gates are met.
+  The current authorization is limited to Phase 1.
   Changes to shared auth, contracts, design tokens or other shared files require
   separate lead approval and coordination with the file owner.
 - **PR review:** Mahdi is the assigned non-author reviewer. Record the actual
@@ -53,11 +50,11 @@ sprint and readiness in Jira before implementation.
 
 | Gate | Status |
 | --- | --- |
-| Task branch and planned start | Verified. The branch is based on live `main` at `49b91e4`. D5 (Nov 24) has passed. |
+| Task branch and planned start | Verified. The task branch was fast-forwarded to live `main` at `04b091d`, which already includes the plan merge. D5 (Nov 24) has passed. |
 | Dependencies | PC-S1-01 through PC-S1-04 are merged on main and recorded as Done in the lead’s progress log. PC-S1-05 is also merged. |
 | Owner plan and test path | Approved by Tarek. The task-owned spec is within the repository’s test exception and the user-approved scope. |
 | Live Jira | Unavailable. The repository baseline lists the task, assignee, sprint and dependencies. |
-| Visual direction | Unverified. Phase 1 is on hold until Reem’s visual approval is confirmed. |
+| Visual direction | Confirmed by Tarek in the PC-S1-08 conversation on Nov 25, 2026. |
 
 Phase 1 covers the technician layout, My Jobs and Job Details, their loading,
 empty, error and permission-denied states, and relevant tests. Later phases
@@ -93,7 +90,10 @@ adapter implementations, shared layout, auth, tokens and test configuration unto
 | `src/app/technician/reports/[reportId]/page.tsx` | Open the technician’s report in the same mock store. |
 | `src/app/(dashboard)/reports/[reportId]/page.tsx` | Open a known mock report ID in the coordinator shell using the shared report view. |
 | `src/features/technician/job-list.tsx` | Load assigned jobs and show the list and recovery states. |
-| `src/features/technician/job-inspection.tsx` | Manage job start, step navigation, form values, photo registration and completion. |
+| `src/features/technician/job-details.tsx` | Load and display the job summary in Phase 1. |
+| `src/features/technician/job-query.tsx` | Handle pending, retry, permission and unavailable states for technician job reads. |
+| `src/components/technician/job-summary.tsx` | Share the visible job status and scheduled-date display. |
+| `src/features/technician/job-inspection.tsx` | Manage job start, step navigation, form values, photo registration and completion in later phases. |
 | `src/features/technician/inspection-form.ts` | Prepare and validate form values and the repeatable submission request. |
 | `src/features/technician/service-report.tsx` | Load the report via the adapter and handle loading, missing, denied and retry states. |
 | `src/components/technician/checklist-fields.tsx` | Render labeled checklist controls and field errors. |
@@ -211,15 +211,21 @@ separately.
 
 ## Evidence
 
-| Check | Status before implementation |
+| Check | Phase 1 result |
 | --- | --- |
-| Scope check | Passed. Only this worklog changed. |
-| Affected tests | Not run. The harness found no runtime or test changes. |
+| Scope check | Passed. The harness accepted the worklog, seven source files, and the task-owned Playwright spec. |
+| Affected Vitest run | No related unit tests found. The existing mock-adapter suite passed all 39 tests when run directly. |
+| Lint and type checking | Passed. |
 | Full CI | Not run |
-| Desktop and mobile Playwright | Not run |
-| Browser accessibility and responsive review | Not run |
-| Screenshots | Not captured |
+| Desktop and mobile Playwright | Phase 1 spec passed 9 tests with 1 intentional skip. The duplicate mobile-project run of the three-width test was skipped. |
+| Browser accessibility and responsive review | Checked visible keyboard focus on View Job, keyboard activation, and no page-wide horizontal overflow on both pages at 375, 768 and 1440 px. Screen-reader, contrast, zoom and touch-target verification remain pending. |
+| Screenshots | Captured both Phase 1 screens at all three widths. Local images are under `test-results/pc-s1-08-local-chrome/`. |
 | Impeccable critique | Not run |
+
+Phase 1 Playwright used the repository's desktop and mobile settings with an
+ignored local config selecting installed Chrome while the pinned Chromium
+download was incomplete. The first run exposed a test that checked focus after
+a pointer action. The rerun checked keyboard focus through Tab navigation.
 
 ## Risk, security and UX review
 
@@ -232,27 +238,42 @@ does not span the coordinator and technician route groups. Real cross-role
 persistence belongs to Sprint 2. A rollback removes the task’s routes and
 tests without any data migration.
 
+## Phase 1 implementation
+
+The technician layout reuses the shared shell, mock session guard and one
+adapter provider. My Jobs reads `dispatch.listJobs` and links to Job Details,
+which reads `dispatch.getJob`. The screens share loading, error, retry and
+access messages. Missing and out-of-scope jobs share the same unavailable
+message. Status chips pair text with existing design token colors.
+
+This phase reads jobs only. Start Job, form steps, reports and the completion
+journey remain in later phases.
+
 ## Developer review guide
 
 ### Review these first
 
-- [Proposed files](#proposed-files) for the route layout and allowed scope.
-- [Build phases](#build-phases) for Start Job, mock photo registration and the
-  same-ID retry.
-- [Tests](#tests) and [review evidence](#responsive-accessibility-and-critique-evidence)
-  for how the 375, 768 and 1440 px layouts will be checked.
+- [Technician layout](../../src/app/technician/layout.tsx#L8). Check the demo
+  role boundary and reuse of the shared shell.
+- [My Jobs](../../src/features/technician/job-list.tsx#L10) and
+  [Job Details](../../src/features/technician/job-details.tsx#L9). Check the
+  summary, labels and Back to My Jobs link.
+- [Job read states](../../src/features/technician/job-query.tsx#L21). Check the
+  retry copy and that denied or unavailable jobs reveal no details.
+- [Browser tests](../../src/app/__e2e__/technician.spec.ts#L14). Check that
+  the job, error and role scenarios match the design.
 
 ### You need to do or decide
 
-- Share the original message or link if Reem’s go-ahead also approved the
-  visual direction. Otherwise, confirm that point with Reem before Phase 1.
-- Confirm KAN-20’s current Jira state when access is available.
+- Add the direct approval link if available. Tarek’s confirmation is recorded
+  above.
+- Review the Phase 1 screens before approving any later phase. Confirm
+  KAN-20’s current Jira state when access is available.
 - Have Mahdi review the eventual PR and record the result.
 
 ## Handoff
 
-Status: Plan and Playwright path approved by Tarek. Phase 1 is on hold pending
-verification of Reem’s visual approval.
-Files changed: `worklogs/PC-S1-08/plan.md`.
-Next step: Record the existing visual approval or Reem’s clarification, then
-build the technician layout, My Jobs and Job Details with their first tests.
+Status: Phase 1 implementation complete. Later phases await authorization.
+Files changed: this worklog, the Phase 1 routes, components and browser spec.
+Next step: Review the Phase 1 screens and evidence before proceeding to
+Start Job and the checklist.
