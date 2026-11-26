@@ -5,7 +5,7 @@ Jira: [KAN-20](https://techtalks-panelcare.atlassian.net/browse/KAN-20) | PR: no
 Planned start: D5 (Nov 24, 2026) | Review-ready target: D10 (Nov 29, 2026)
 Branch: `s1/tarek/pc-s1-08` | Base for Phase 1: `04b091d`
 Plan prepared: Nov 25, 2026 | Owner plan approval: Tarek, Nov 25, 2026
-Current implementation authorization: Phases 1 through 4. Tarek requested Phase 4 verification and in-scope fixes in the task conversation.
+Current implementation authorization: Phases 1 through 5. Tarek requested final verification, in-scope fixes, and a local PR description. Git publication remains pending.
 
 ## Goal and scope
 
@@ -162,7 +162,7 @@ adapter implementations, shared layout, auth, tokens and test configuration unto
 ### Review evidence
 
 - [x] Playwright shows a simulated technician completion and form errors in the mobile and desktop projects.
-- [ ] Capture responsive screenshots and record the manual accessibility review and Impeccable results.
+- [x] Capture screenshots at three widths and record the visual review, rendered accessibility checks and Impeccable results. See Phase 5 for the checks still open.
 
 ## Tests
 
@@ -396,33 +396,137 @@ in the `test-results/pc-s1-08-phase4-*.log` files.
   and reloading resets the demo records. Real upload, storage, sign-in,
   and cross-role persistence are outside this task.
 
+## Phase 5 review scope
+
+Review the mock technician journey and its report at 375, 768 and 1440 px.
+Verify keyboard, contrast, touch-target sizes and reflow. Repeat the source
+scan and the functional checks. Reproduce the dashboard failure from an
+isolated archive of live main. Keep fixes in the technician paths and
+approved Playwright spec, record remaining shared issues, and prepare the PR
+description in this worklog. Leave Git and GitHub publication to the owner.
+
+### Phase 5 screen and accessibility evidence (Nov 26, 2026)
+
+Reviewed the captured My Jobs, Job Details, Checklist, Photo Evidence,
+Review & Confirm, and Service Report screens at 375, 768, and 1440 px.
+At 375 px the form and actions stack. At 768 px the job cards and photo grid
+use the available width while the form keeps one reading column. At 1440 px
+the job context sits beside the inspection, and the report puts evidence and
+acknowledgment beside the results. The three checked-in reference captures
+remain representative of the current application. The 18 fresh captures
+and three review sheets are under local `test-results/pc-s1-08-phase5-audit-output/`.
+The seeded coordinator report was also captured and reviewed at all three
+widths. It stacks at 375 px, shows paired fields at 768 px, and places photo
+evidence and acknowledgment beside the report at 1440 px.
+
+The local Chrome audit ran the six-screen journey at each width with
+axe-core 4.14.1 using the WCAG 2.0 and 2.1 A/AA rule tags in `#main`.
+All 18 technician scans and all three coordinator report scans returned zero
+violations and zero incomplete results. The rendered color-contrast rule
+passed in each scan. The browser checks exercised Enter to
+open the job and advance the inspection, first-invalid-field focus, Tab
+from customer name to acknowledgment, Space to check it, and keyboard access
+to the resulting report. The job, picker, remove, confirmation and report
+controls sampled in the audit were at least 44 px high. The six screens fit
+at all three default-text widths. At 375 px and 200% root text, the technician
+main content still fit while the shared mock banner extended the document to
+398 px. The axe results and measurements are in
+`test-results/pc-s1-08-phase5-audit.log` and
+`test-results/pc-s1-08-phase5-coordinator-audit.log`.
+
+Impeccable 4.10.0 returned no findings when its source detector was repeated
+on the technician routes, components and features, and the coordinator report
+route. The separate Chrome audit supplies rendered evidence. No new in-scope
+application or test changes were needed during this final review.
+
+```powershell
+npx.cmd --yes impeccable@4.10.0 detect --json src/app/technician src/features/technician src/components/technician 'src/app/(dashboard)/reports'
+```
+
+### Final validation (Nov 26, 2026)
+
+| Check | Actual result |
+| --- | --- |
+| `node scripts/harness.mjs validate` and `node scripts/harness.mjs check` | Passed harness configuration, branch, sprint, owner and allowed-path checks. |
+| `node scripts/ci.mjs` | Failed with exit code 1. Harness validation, ESLint and TypeScript passed. Vitest ran all 130 tests: 129 passed, one shared dashboard date test failed. CI stopped at Vitest. All six technician form unit tests and all three mock submission tests passed. |
+| `npm run build` | Passed when run separately after CI stopped. Next.js compiled and generated all eight static pages. |
+| `node node_modules/@playwright/test/cli.js test --config test-results/pc-s1-08.production.config.ts --workers 2 --timeout 60000 --retries 1` | Passed with 41 passed, 3 intentionally skipped and no failures or retries. This used installed Chrome against the production build with the repository desktop and mobile profiles. 19 technician cases passed. |
+| Impeccable `detect --json` 4.10.0 | Passed with `[]` across the task-owned UI source. |
+
+The Playwright skips were the dashboard's mobile-only menu on desktop and the
+registry and technician three-width checks on mobile. Those two tests ran all
+three widths in the desktop project. The bundled Chromium binary was missing
+locally, so an ignored local configuration selected installed Chrome without
+changing shared configuration.
+
+The first Phase 5 CI attempt stopped at ESLint because it picked up a
+temporary audit spec under `test-results`. The first separate build attempt
+failed with a Windows `readlink` error on generated `.next/server/chunks`.
+After moving temporary audit files and the old generated build cache to a
+temporary directory, lint and the standalone build passed. See the local
+`test-results/pc-s1-08-phase5-{preflight-ci,preflight-build,ci,build,browser,impeccable}.log`
+files for both attempts and final output.
+
+### Acceptance review
+
+| PC-S1-08 acceptance criterion | Evidence |
+| --- | --- |
+| Mobile job list and details, checklist with readings, notes, photo picker, and customer confirmation | The assigned-job Playwright flow exercised all steps in desktop and mobile Chrome. Required readings, an out-of-range reading, photo formats and limits, and both confirmation fields have passing coverage. |
+| Submission handles missing mandatory inputs and retry without claiming actual upload | The form blocks missing inputs, holds completion until the mock confirms, and checks job status before a same-ID retry. The integration tests verify recovery after partial photo registration and a lost completion response. Browser checks cover duplicate taps and keep one report link. |
+| Report displays a structured mock result and accessible image alternatives | The technician sees readings with units, notes, acknowledgment and caption text for unavailable images. The coordinator can read the seeded report. The browser suite exercises loading, error, retry, denied and unavailable report states. |
+
+### Verified baseline and remaining limits
+
+- GitHub's live `main` was `04b091d`. Vitest ran the dashboard spec from an
+  isolated archive of that exact revision on Node 22.22.0 and ICU 77.1.
+  Seven passed and one failed with the same comma mismatch at line 105.
+  The branch and the shared dashboard files stayed untouched. The captured
+  baseline output is in `test-results/pc-s1-08-phase5-main-dashboard.log`.
+- Reem should route the dashboard date expectation and enlarged-text mock
+  banner to the shared UI owner. Both issues remain outside this task. The
+  dashboard failure keeps the full local CI command red.
+- The automated audit covers the rendered technician content. A live
+  screen-reader session, native picker behavior on a physical device,
+  browser zoom, and other browsers were not checked. The text-size change
+  was applied through the root font size. The shared shell was outside the
+  axe scan.
+- Mock photos register details only. Reports and retries are limited to the
+  current mock store. Draft entries are held in memory. Reloading or losing
+  the session can discard data, and there is no offline storage or sync.
+  The coordinator's separate demo store reads seeded reports. Real
+  authentication, upload and persistence remain outside S1. Final customer
+  wording (D06) and real-photo consent and retention (D07) are still pending.
+- Live Jira was unavailable. The repository's KAN-20 definition and the
+  confirmed plan were used for the acceptance review.
+
 ## Developer review guide
 
 ### Review these first
 
-- [Review and confirmation](../../src/components/technician/inspection-review.tsx).
-  Try correcting a name or checkbox error and check that its message clears.
-- [Report layout](../../src/components/technician/report-content.tsx).
-  Check wrapping and the text alternative for the missing demo image.
-- [Technician browser tests](../../src/app/__e2e__/technician.spec.ts).
-  Review the assigned-job journey, boundary checks and retry assertions.
-- [Screenshots](#phase-4-results-nov-26-2026).
-  Review the three widths and the limitations recorded below them.
+- [Submission state](../../src/features/technician/use-inspection-submission.ts#L23).
+  Check that an uncertain submission requires a job-status check before a
+  retry, and that the retry keeps the original ID.
+- [Technician journey](../../src/app/__e2e__/technician.spec.ts#L252).
+  Check that completion appears after mock confirmation and repeated taps
+  lead to one report.
+- [Report sections](../../src/components/technician/report-content.tsx#L8).
+  Check the reading order, units, captions and text for unavailable images.
+- [Responsive and accessibility evidence](#phase-5-screen-and-accessibility-evidence-nov-26-2026).
+  Review the layout at each width and the recorded shared banner limit.
 
 ### You need to do or decide
 
-- Add the direct approval link if available. Tarek’s confirmation is recorded
-  above.
-- Confirm with Reem who will own the dashboard date-test and shared banner
-  fixes. Check any remaining assistive technology and physical device
-  behavior before review. Confirm KAN-20’s Jira state when access is available.
-- Have Mahdi review the eventual PR and record the result.
+- Ask Mahdi for the non-author review when the branch is published and record
+  the outcome in the PR. No review result is recorded yet.
+- Confirm KAN-20’s live Jira state and add Reem’s direct visual approval
+  link if available. Tarek’s confirmation is recorded above.
+- Ask Reem to route the shared dashboard test and banner fixes, and include
+  browser zoom, physical device and screen-reader checks in UX signoff.
 
 ## Handoff
 
-Status: Phase 4 validation recorded. Technician checks passed. Full CI still
-fails on the existing dashboard assertion. Phase 5 has not started.
-Files changed: the confirmation and report components, technician Playwright
-spec, and this worklog with its representative screenshots.
-Next step: Review the evidence and remaining shared issues before authorizing
-Phase 5.
+Phase 5 is complete. The technician work meets the three repository
+acceptance criteria and is ready for Mahdi’s review. Full CI still fails on
+the dashboard assertion reproduced on main, so the change is not ready to
+merge. Phase 5 updates this worklog and the [prepared PR description](pr.md).
+Git publication and PR creation are pending Tarek’s authorization.
