@@ -5,7 +5,7 @@ Jira: [KAN-20](https://techtalks-panelcare.atlassian.net/browse/KAN-20) | PR: no
 Planned start: D5 (Nov 24, 2026) | Review-ready target: D10 (Nov 29, 2026)
 Branch: `s1/tarek/pc-s1-08` | Base for Phase 1: `04b091d`
 Plan prepared: Nov 25, 2026 | Owner plan approval: Tarek, Nov 25, 2026
-Current implementation authorization: Phases 1 through 3. Tarek requested Phase 3 in the task conversation.
+Current implementation authorization: Phases 1 through 4. Tarek requested Phase 4 verification and in-scope fixes in the task conversation.
 
 ## Goal and scope
 
@@ -325,32 +325,104 @@ the existing desktop and mobile settings. Logs:
 `test-results/pc-s1-08-phase3-build.log` and
 `test-results/pc-s1-08-phase3-browser.log`.
 
+## Phase 4 verification scope
+
+Run the full unit suite and CI, the complete desktop and mobile Playwright
+suite, and the harness structure and scope checks. Verify the journey
+from My Jobs through the report, including invalid input, photo limits,
+mock states, retry, and role boundaries. Capture responsive test evidence
+and record actual checks and limitations. Keep changes within the
+technician task and the approved Playwright spec. Phase 5 remains pending.
+
+### Phase 4 results (Nov 26, 2026)
+
+| Check | Actual result |
+| --- | --- |
+| `node scripts/harness.mjs validate`, `node scripts/harness.mjs check`, and `git diff --check` | Passed. |
+| `node scripts/harness.mjs test --no-e2e` | All 9 affected technician unit and integration tests passed. |
+| `node scripts/ci.mjs` | Harness validation, lint and type checking passed. The full Vitest suite ran all 130 tests. 129 passed and one existing coordinator dashboard date-format test failed. CI stopped before the build. |
+| `npm run build` | The separate local production build passed on Next.js 15.5.29. |
+| Full Playwright suite | All 41 runnable checks passed across the final run and retries in local Chrome, using the repository's desktop and mobile profiles against that production build. Three project-specific checks were intentionally skipped. The final full run passed 37 checks and four timed out under four workers. Three passed on retry with two workers. The remaining mobile registry case passed with one worker on an isolated port. |
+| Impeccable 4.10.0 | `npx impeccable@4.10.0 detect --json` returned no findings for the technician route, feature and component folders and coordinator report route. This was a source scan. |
+
+The [technician browser spec](../../src/app/__e2e__/technician.spec.ts) starts
+from an assigned job in My Jobs, starts the job, checks readings, adds notes
+and a synthetic photo, confirms, submits and opens the resulting report. It
+also checks missing readings and acknowledgment, an out-of-range reading,
+unsupported file type, the 5 MB per-file and 10-photo limits, loading, empty,
+error and denied states, and a same-attempt retry after checking job status.
+Duplicate clicks led to one report. The integration test verified that replay
+used the same submission ID and did not register the same photos again.
+The photo step showed **Selected** and the report explained that its image
+preview is unavailable. The failure and status-check states showed no
+completion message or report link. The technician saw the report created
+within the open mock session. The coordinator saw a seeded report and the
+loading, error, retry, denied and unavailable states.
+
+The confirmation screen now clears stale field errors when the corresponding
+field changes. The confirmation and report layouts now wrap at enlarged
+text sizes. The browser checks verified visible job-link focus, Tab order
+from the customer name to the acknowledgment checkbox, first-invalid-field
+focus, a submit target at least 44 px tall, no page-wide horizontal scroll at
+the three default-text widths, and no horizontal overflow in technician
+content at 375 px with the root text set to 200%. The checked token pairs
+included primary action text (6.79:1), muted text on a white surface
+(6.87:1), error text (6.03:1), control borders (3.59:1) and focus outlines
+(5.17:1). This measured selected pairs and did not cover every rendered state.
+
+Captured the six technician views at all three widths. Reviewed the
+[375 px confirmation](screenshots/phase4-confirmation-375.png),
+[768 px photo evidence](screenshots/phase4-photo-evidence-768.png), and
+[1440 px service report](screenshots/phase4-service-report-1440.png).
+All 18 captures are in local `test-results/pc-s1-08-phase4-screenshots/`.
+CI, build, browser, browser retry, isolated browser and Impeccable output are
+in the `test-results/pc-s1-08-phase4-*.log` files.
+
+### Remaining limitations and lead handoff
+
+- Full CI is still red. The unchanged
+  [dashboard test](../../src/features/dashboard/__tests__/dashboard-view.test.ts#L105)
+  requires no comma after the weekday. Local Node 22.22.0 with ICU 77.1 produces
+  `Sunday, 22 November 2026`. The dashboard formatter and test match
+  `origin/main`. Reem should route the fix to the dashboard owner.
+- At 375 px and 200% text, the shared mock scenario banner extended to 398 px.
+  The technician content reflow check passed after the in-scope fixes.
+  The banner belongs to shared layout and needs its own fix.
+- Real screen-reader announcements, physical touch-device behavior, and
+  whole-page browser zoom were not checked. The source detector does not
+  replace a rendered accessibility review.
+- Sprint 1 reports and photo metadata live in the in-memory store. A new
+  technician report does not cross into the coordinator's separate store,
+  and reloading resets the demo records. Real upload, storage, sign-in,
+  and cross-role persistence are outside this task.
+
 ## Developer review guide
 
 ### Review these first
 
 - [Review and confirmation](../../src/components/technician/inspection-review.tsx).
-  Try submitting before entering the name and checking the acknowledgment.
-- [Submission and recovery](../../src/features/technician/use-inspection-submission.ts).
-  Check that the success message requires an adapter response and retry follows
-  the job-status check.
-- [Report](../../src/components/technician/report-content.tsx). Check the
-  readings, notes, confirmation and text for evidence images.
-- [Technician browser tests](../../src/app/__e2e__/technician.spec.ts). Review
-  the final validation, duplicate tap, retry and report coverage.
+  Try correcting a name or checkbox error and check that its message clears.
+- [Report layout](../../src/components/technician/report-content.tsx).
+  Check wrapping and the text alternative for the missing demo image.
+- [Technician browser tests](../../src/app/__e2e__/technician.spec.ts).
+  Review the assigned-job journey, boundary checks and retry assertions.
+- [Screenshots](#phase-4-results-nov-26-2026).
+  Review the three widths and the limitations recorded below them.
 
 ### You need to do or decide
 
 - Add the direct approval link if available. Tarek’s confirmation is recorded
   above.
-- Review the Phase 3 screens before approving any later phase. Confirm
-  KAN-20’s current Jira state when access is available.
+- Confirm with Reem who will own the dashboard date-test and shared banner
+  fixes. Check any remaining assistive technology and physical device
+  behavior before review. Confirm KAN-20’s Jira state when access is available.
 - Have Mahdi review the eventual PR and record the result.
 
 ## Handoff
 
-Status: Phase 3 implemented and its targeted checks passed. Phase 4 awaits authorization.
-Files changed: this worklog, the technician flow and report routes,
-confirmation and submission components and helpers, and technician tests.
-Next step: Review confirmation, same-ID retry and the mock report before
-authorizing Phase 4.
+Status: Phase 4 validation recorded. Technician checks passed. Full CI still
+fails on the existing dashboard assertion. Phase 5 has not started.
+Files changed: the confirmation and report components, technician Playwright
+spec, and this worklog with its representative screenshots.
+Next step: Review the evidence and remaining shared issues before authorizing
+Phase 5.

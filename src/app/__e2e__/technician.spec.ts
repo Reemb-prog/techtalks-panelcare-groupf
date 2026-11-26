@@ -1,9 +1,36 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page, type TestInfo } from "@playwright/test";
 import { fixtureId } from "../../lib/fixtures/ids";
 
 const assignedJobId = fixtureId("job", 2);
 const assignedJobPath = `/technician/jobs/${assignedJobId}`;
 const anotherTechnicianJobId = fixtureId("job", 5);
+const photoPng = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=", "base64");
+const reviewWidths = [375, 768, 1440];
+
+async function captureViewports(page: Page, info: TestInfo, screen: string) {
+  const original = page.viewportSize();
+  for (const width of reviewWidths) {
+    await page.setViewportSize({ width, height: 900 });
+    expect(await page.locator("#main").evaluate((main) => main.scrollWidth)).toBeLessThanOrEqual(width);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.screenshot({ path: info.outputPath(`${screen}-${width}.png`), fullPage: true, animations: "disabled" });
+    if (width === 375) {
+      const enlarged = await page.locator("#main").evaluate((main) => {
+        const root = document.documentElement;
+        const originalFontSize = root.style.fontSize;
+        root.style.fontSize = "200%";
+        try {
+          return { content: main.scrollWidth, container: main.clientWidth };
+        } finally {
+          root.style.fontSize = originalFontSize;
+        }
+      });
+      expect(enlarged.content, `${screen} with 200% text size`).toBeLessThanOrEqual(enlarged.container);
+    }
+  }
+  if (original) await page.setViewportSize(original);
+}
 
 async function signIn(page: Page, role: "technician" | "coordinator" = "technician") {
   await page.goto("/login");
@@ -138,7 +165,7 @@ test("starts a job and validates readings before opening photos and notes", asyn
     {
       name: "panel.png",
       mimeType: "image/png",
-      buffer: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=", "base64"),
+      buffer: photoPng,
     },
   ]);
   await expect(page.getByText("visit.txt: Use a JPEG, PNG or WebP image.")).toBeVisible();
@@ -156,6 +183,16 @@ test("starts a job and validates readings before opening photos and notes", asyn
   await page.getByRole("button", { name: /Remove Photo 1: panel.png/ }).click();
   await expect(preview).toHaveCount(0);
   await expect(page.getByText("0 of 10 selected.", { exact: false })).toBeVisible();
+  await picker.setInputFiles([
+    { name: "oversized.png", mimeType: "image/png", buffer: Buffer.alloc(5 * 1024 * 1024 + 1) },
+    ...Array.from({ length: 11 }, (_, index) => ({
+      name: `panel-${index + 1}.png`, mimeType: "image/png", buffer: photoPng,
+    })),
+  ]);
+  await expect(page.getByText("oversized.png: Photos must be at most 5 MB.")).toBeVisible();
+  await expect(page.getByText("panel-11.png: Choose no more than 10 photos per job.")).toBeVisible();
+  await expect(page.getByRole("list", { name: "Selected photos" }).getByRole("listitem")).toHaveCount(10);
+  await expect(page.getByText("Uploaded", { exact: true })).toHaveCount(0);
 });
 
 test("offers a retry when the mock Start Job action fails", async ({ page }) => {
@@ -177,9 +214,15 @@ test("offers a retry when the mock Start Job action fails", async ({ page }) => 
   await expect(page.getByRole("heading", { name: "Inspection Checklist" })).toBeVisible();
 });
 
-async function openConfirmation(page: Page, withPhoto = false) {
+async function openConfirmation(page: Page, withPhoto = false, evidence?: TestInfo) {
   await signIn(page);
-  await page.goto(`/technician/jobs/${fixtureId("job", 7)}`);
+  if (withPhoto) {
+    await page.getByRole("link", { name: /^View Job/ }).and(page.locator(`[href="${assignedJobPath}"]`)).click();
+    await page.getByRole("button", { name: "Start Job", exact: true }).click();
+    await expect(page.getByText("In progress", { exact: true })).toBeVisible();
+  } else {
+    await page.goto(`/technician/jobs/${fixtureId("job", 7)}`);
+  }
   await page.getByLabel(/AC and DC isolators/).selectOption("true");
   await page.getByLabel(/Panel surface condition/).selectOption("good");
   await page.getByLabel(/Mounting and fixings secure/).selectOption("true");
@@ -187,22 +230,27 @@ async function openConfirmation(page: Page, withPhoto = false) {
   await page.getByLabel(/String DC voltage \(V\)/).fill("0");
   await page.getByLabel(/AC output at time of visit \(kW\)/).fill("2.5");
   await page.getByLabel(/Panel cleaning performed/).selectOption("none");
+  if (evidence) await captureViewports(page, evidence, "checklist");
   await page.getByRole("button", { name: "Continue to Photo Evidence" }).click();
   if (withPhoto) {
     await page.getByLabel("Inspection notes (optional)").fill("Checked the demo array.");
     await page.getByLabel("Add photos").setInputFiles({
       name: "panel.png",
       mimeType: "image/png",
-      buffer: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=", "base64"),
+      buffer: photoPng,
     });
     await page.getByLabel("Caption for photo 1 (optional)").fill("Panel after review");
+    if (evidence) {
+      await expect(page.getByRole("img", { name: "Selected photo: panel.png" })).toBeVisible();
+      await captureViewports(page, evidence, "photo-evidence");
+    }
   }
   await page.getByRole("button", { name: "Continue to Confirmation" }).click();
   await expect(page.getByRole("heading", { name: "Review & Confirm" })).toBeFocused();
 }
 
-test("validates confirmation and opens the report after mock completion", async ({ page }) => {
-  await openConfirmation(page, true);
+test("completes the assigned job journey and opens the report after mock confirmation", async ({ page, isMobile }, info) => {
+  await openConfirmation(page, true, isMobile ? undefined : info);
   const submit = page.getByRole("button", { name: "Submit Inspection", exact: true });
   const name = page.getByLabel("Customer name", { exact: true });
   const acknowledges = page.getByRole("checkbox", { name: /acknowledges/ });
@@ -210,11 +258,20 @@ test("validates confirmation and opens the report after mock completion", async 
   await expect(name).toBeFocused();
   await expect(name).toHaveAttribute("aria-invalid", "true");
   await name.fill("Demo Customer");
+  await expect(name).toHaveAttribute("aria-invalid", "false");
   await submit.click();
   await expect(acknowledges).toBeFocused();
   await expect(acknowledges).toHaveAttribute("aria-invalid", "true");
   await expect(page.getByText("Inspection completed (demo).")).toHaveCount(0);
   await acknowledges.check();
+  await expect(acknowledges).toHaveAttribute("aria-invalid", "false");
+  await expect(page.getByText("Selected", { exact: true })).toBeVisible();
+  await expect(page.getByText("Uploaded", { exact: true })).toHaveCount(0);
+  await name.focus();
+  await page.keyboard.press("Tab");
+  await expect(acknowledges).toBeFocused();
+  expect((await submit.boundingBox())?.height).toBeGreaterThanOrEqual(44);
+  if (!isMobile) await captureViewports(page, info, "confirmation");
   await submit.evaluate((button: HTMLButtonElement) => {
     button.click();
     button.click();
@@ -231,10 +288,12 @@ test("validates confirmation and opens the report after mock completion", async 
   await expect(photos.getByRole("listitem")).toHaveCount(1);
   await expect(photos.getByText("Panel after review")).toBeVisible();
   await expect(photos.getByText("Image preview unavailable in this demo.")).toBeVisible();
+  await expect(report.getByText("Uploaded", { exact: true })).toHaveCount(0);
   await expect(report.getByText("Demo Customer", { exact: true })).toBeVisible();
+  if (!isMobile) await captureViewports(page, info, "service-report");
   const reportPath = new URL(page.url()).pathname;
   await report.getByRole("link", { name: "Back to My Jobs" }).click();
-  await page.getByRole("link", { name: /^View Job/ }).and(page.locator(`[href="/technician/jobs/${fixtureId("job", 7)}"]`)).click();
+  await page.getByRole("link", { name: /^View Job/ }).and(page.locator(`[href="${assignedJobPath}"]`)).click();
   await expect(page.getByRole("link", { name: "View Service Report" })).toHaveAttribute("href", reportPath);
   await expect(page.getByRole("button", { name: "Submit Inspection" })).toHaveCount(0);
 });
@@ -253,27 +312,37 @@ test("checks job status before retrying an unconfirmed submission", async ({ pag
   await page.clock.runFor(2500);
   await mockData.selectOption("ok");
   await expect(page.getByText(/Submission status unknown/)).toBeVisible();
+  await expect(page.getByText("Inspection completed (demo).")).toHaveCount(0);
   await expect(page.getByRole("link", { name: "View Service Report" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Retry submission" })).toHaveCount(0);
   await page.getByRole("button", { name: "Check job status" }).click();
   await expect(page.getByText(/Job status checked/)).toBeVisible();
+  await expect(page.getByText("Inspection completed (demo).")).toHaveCount(0);
   await page.getByRole("button", { name: "Retry submission" }).click();
   await expect(page.getByText("Inspection completed (demo).")).toBeVisible();
 });
 
-test("shows seeded report data to a demo coordinator and hides missing reports", async ({ page }) => {
+test("handles coordinator report loading, error, retry, denied and unavailable states", async ({ page }) => {
   await signIn(page, "coordinator");
   await page.goto(`/reports/${fixtureId("report", 1)}`);
   const results = page.getByRole("region", { name: "Inspection results" });
   await expect(results).toBeVisible();
   const mockData = page.getByLabel("Mock data");
+  await mockData.selectOption("slow");
+  await expect(page.getByText("Loading service report…")).toBeVisible();
+  await expect(results).toBeVisible();
+  await mockData.selectOption("error");
+  const main = page.locator("#main");
+  await expect(main.getByRole("alert")).toContainText("We couldn't load your service report.");
+  await main.getByRole("button", { name: "Retry" }).click();
+  await expect(main.getByRole("alert")).toContainText("We couldn't load your service report.");
   await mockData.selectOption("denied");
   await expect(page.getByText("You don't have permission to view this report.")).toBeVisible();
   await expect(results).toHaveCount(0);
   await mockData.selectOption("ok");
   await expect(results).toBeVisible();
   await page.goto(`/reports/${fixtureId("report", 999)}`);
-  const unavailable = page.locator("#main").getByRole("alert");
+  const unavailable = main.getByRole("alert");
   await expect(unavailable.getByRole("heading", { name: "Report unavailable" })).toBeVisible();
   await expect(results).toHaveCount(0);
 });
@@ -281,7 +350,7 @@ test("shows seeded report data to a demo coordinator and hides missing reports",
 test("job list and details fit the three review widths", async ({ page, isMobile }, info) => {
   test.skip(isMobile, "The desktop project explicitly sets all three CSS viewports.");
   await signIn(page);
-  for (const width of [375, 768, 1440]) {
+  for (const width of reviewWidths) {
     await page.setViewportSize({ width, height: 900 });
     const jobLink = page.getByRole("list", { name: "Assigned jobs" }).getByRole("link", { name: /^View Job/ }).and(page.locator(`[href="${assignedJobPath}"]`));
     await expect(jobLink).toBeVisible();

@@ -38,6 +38,15 @@ export function InspectionReview({
   const { answers } = validateChecklist(template, draft.answers);
   const locked = state.status !== "idle";
 
+  function clearFieldError(field: string) {
+    setErrors((previous) => {
+      if (!previous[field]) return previous;
+      const updated = { ...previous };
+      delete updated[field];
+      return updated;
+    });
+  }
+
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (locked) return;
@@ -55,7 +64,7 @@ export function InspectionReview({
 
   return (
     <form noValidate onSubmit={submit} aria-labelledby="inspection-review-heading"
-      className="min-w-0 space-y-5 rounded-pc-card border border-pc-border bg-pc-surface p-5 shadow-pc-card">
+      className="min-w-0 space-y-5 rounded-pc-card border border-pc-border bg-pc-surface p-5 [overflow-wrap:anywhere] shadow-pc-card">
       <h2 id="inspection-review-heading" ref={headingRef} tabIndex={-1} className="text-[length:var(--pc-type-section)] font-semibold">
         Review &amp; Confirm
       </h2>
@@ -87,13 +96,16 @@ export function InspectionReview({
         ) : <p className="text-sm text-pc-muted">No photos selected.</p>}
         <p className="text-sm text-pc-muted">The demo registers photo details in memory. Image files stay on this device.</p>
       </section>
-      <fieldset disabled={locked} className="space-y-3 rounded-pc-control border border-pc-border p-4">
-        <legend className="px-1 font-semibold">Customer acknowledgment</legend>
+      <fieldset disabled={locked} className="min-w-0 space-y-3 rounded-pc-control border border-pc-border p-4">
+        <legend className="max-w-full px-1 font-semibold">Customer acknowledgment</legend>
         <div className="space-y-1">
           <label htmlFor="customer-name" className="block font-semibold">Customer name</label>
           <input id="customer-name" type="text" required maxLength={120} value={draft.customerName}
             aria-invalid={Boolean(name)} aria-describedby={name ? "customer-name-error" : undefined}
-            onChange={(event) => onConfirmationChange({ customerName: event.currentTarget.value })}
+            onChange={(event) => {
+              onConfirmationChange({ customerName: event.currentTarget.value });
+              clearFieldError("confirmation.typedName");
+            }}
             className="w-full min-h-[var(--pc-control-min-height)] rounded-pc-control border border-pc-control-border px-3 py-2" />
           {name && <p id="customer-name-error" className="text-sm text-pc-danger-text">{name}</p>}
         </div>
@@ -101,9 +113,12 @@ export function InspectionReview({
           <label htmlFor="customer-acknowledgment" className="flex min-h-[var(--pc-control-min-height)] items-center gap-3">
             <input id="customer-acknowledgment" type="checkbox" required checked={draft.acknowledged}
               aria-invalid={Boolean(acknowledged)} aria-describedby={acknowledged ? "customer-acknowledgment-error" : undefined}
-              onChange={(event) => onConfirmationChange({ acknowledged: event.currentTarget.checked })}
+              onChange={(event) => {
+                onConfirmationChange({ acknowledged: event.currentTarget.checked });
+                clearFieldError("confirmation.acknowledged");
+              }}
               className="size-5 shrink-0 accent-pc-primary" />
-            The customer acknowledges that this visit took place.
+            <span className="min-w-0">The customer acknowledges that this visit took place.</span>
           </label>
           {acknowledged && <p id="customer-acknowledgment-error" className="text-sm text-pc-danger-text">{acknowledged}</p>}
         </div>

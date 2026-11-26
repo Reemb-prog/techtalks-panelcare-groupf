@@ -2,14 +2,14 @@ import type { ReportSnapshot } from "@/types";
 import { displayAnswer } from "./inspection-values";
 import { JobDate, JobStatusBadge } from "./job-summary";
 
-const panel = "min-w-0 space-y-3 rounded-pc-card border border-pc-border bg-pc-surface p-5 shadow-pc-card";
+const panel = "min-w-0 space-y-3 rounded-pc-card border border-pc-border bg-pc-surface p-5 [overflow-wrap:anywhere] shadow-pc-card";
 const localDateTime = new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Beirut" });
 
 export function ReportContent({ snapshot }: { snapshot: ReportSnapshot }) {
   const { job, site, system, customer, checklist, notes, photos, confirmation } = snapshot;
   return (
     <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-      <div className="space-y-4">
+      <div className="min-w-0 space-y-4">
         <section className={panel} aria-labelledby="report-job">
           <h2 id="report-job" className="text-lg font-semibold">Job details</h2>
           <JobStatusBadge status="completed" />
@@ -40,7 +40,7 @@ export function ReportContent({ snapshot }: { snapshot: ReportSnapshot }) {
           <p className="whitespace-pre-wrap break-words">{notes || "No notes recorded."}</p>
         </section>
       </div>
-      <div className="space-y-4">
+      <div className="min-w-0 space-y-4">
         <section className={panel} aria-labelledby="report-photos">
           <h2 id="report-photos" className="text-lg font-semibold">Photo evidence</h2>
           {photos.length ? (
