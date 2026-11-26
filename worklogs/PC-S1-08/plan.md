@@ -5,7 +5,7 @@ Jira: [KAN-20](https://techtalks-panelcare.atlassian.net/browse/KAN-20) | PR: no
 Planned start: D5 (Nov 24, 2026) | Review-ready target: D10 (Nov 29, 2026)
 Branch: `s1/tarek/pc-s1-08` | Base for Phase 1: `04b091d`
 Plan prepared: Nov 25, 2026 | Owner plan approval: Tarek, Nov 25, 2026
-Current implementation authorization: Phases 1 and 2. Tarek approved Phase 2 on Nov 26, 2026.
+Current implementation authorization: Phases 1 through 3. Tarek requested Phase 3 in the task conversation.
 
 ## Goal and scope
 
@@ -37,7 +37,7 @@ sprint and readiness in Jira before implementation.
 - **Plan approval:** Tarek approved the plan and the task-owned Playwright path
   on Nov 25, 2026. This is routine owner self-approval under
   [D11](../../docs/DECISIONS.md#decisions-approvals-and-material-change-control).
-  Tarek added Phase 2 authorization on Nov 26, 2026.
+  Tarek added Phase 2 authorization on Nov 26, 2026 and has since authorized Phase 3.
   Changes to shared auth, contracts, design tokens or other shared files require
   separate lead approval and coordination with the file owner.
 - **PR review:** Mahdi is the assigned non-author reviewer. Record the actual
@@ -96,11 +96,14 @@ adapter implementations, shared layout, auth, tokens and test configuration unto
 | `src/components/technician/job-summary.tsx` | Share the visible job status and scheduled-date display. |
 | `src/features/technician/job-inspection.tsx` | Manage job start, step navigation, form values, photo registration and completion in later phases. |
 | `src/features/technician/inspection-form.ts` | Prepare and validate form values and the repeatable submission request. |
+| `src/features/technician/inspection-submission.ts` and `use-inspection-submission.ts` | Validate final input, track confirmed photo IDs, and retain the request and submission ID for a safe retry. |
 | `src/features/technician/service-report.tsx` | Load the report via the adapter and handle loading, missing, denied and retry states. |
 | `src/components/technician/checklist-fields.tsx` | Render labeled checklist controls and field errors. |
 | `src/components/technician/photo-evidence.tsx` | Render the picker, local preview, caption, grouped status and actions for each photo. |
+| `src/components/technician/inspection-review.tsx` and `inspection-values.ts` | Show the summary, customer acknowledgment and submission states. Share answer formatting with the report. |
 | `src/components/technician/report-content.tsx` | Render the read-only snapshot and accessible evidence alternatives. |
 | `src/features/technician/__tests__/inspection-form.test.ts` | Test technician form and retry logic at the lowest useful layer. |
+| `src/features/technician/__tests__/inspection-submission.test.ts` | Verify final validation, partial registration recovery, and an exact replay after a lost response. |
 | `src/app/__e2e__/technician.spec.ts` | Test the browser journey on desktop and mobile. |
 | `worklogs/PC-S1-08/screenshots/` | Store the 375, 768 and 1440 px evidence, for example `technician-375.png`, `technician-768.png` and `technician-1440.png`. |
 | `worklogs/PC-S1-08/pr.md` | Write the complete PR description when review-ready. |
@@ -153,12 +156,12 @@ adapter implementations, shared layout, auth, tokens and test configuration unto
 
 ## Acceptance criteria
 
-- [ ] Mobile job list/detail, checklist with readings, notes, photo picker and customer confirmation.
-- [ ] Submission handles missing mandatory inputs and retry without claiming actual upload.
-- [ ] Report screen displays structured mock result and accessible image alternatives.
+- [x] Mobile job list/detail, checklist with readings, notes, photo picker and customer confirmation.
+- [x] Submission handles missing mandatory inputs and retry without claiming actual upload.
+- [x] Report screen displays structured mock result and accessible image alternatives.
 ### Review evidence
 
-- [ ] Playwright shows a simulated technician completion and form errors in the mobile and desktop projects.
+- [x] Playwright shows a simulated technician completion and form errors in the mobile and desktop projects.
 - [ ] Capture responsive screenshots and record the manual accessibility review and Impeccable results.
 
 ## Tests
@@ -290,31 +293,64 @@ now sets its clock before signing in. Logs are in
 `test-results/pc-s1-08-phase2-build.log` and
 `test-results/pc-s1-08-phase2-production-run.log`.
 
+## Phase 3 implementation
+
+- Review & Confirm shows readings, notes, and selected photo details. The final
+  validation checks the template version, answers, photo limits, typed name and
+  customer acknowledgment before sending any request.
+- The mock adapter registers only photo metadata. Confirmed registration IDs
+  are reused after a failed attempt. The submit action is locked while a request
+  is in flight. If completion is uncertain, check the job status, then retry
+  the original request with the same submission ID. A confirmed mock response
+  is required before showing completion.
+- The read-only report shows the mock snapshot with units, notes, acknowledgment,
+  and photo captions with a text explanation where images are unavailable.
+  The technician report opens in the same mock store. The coordinator route can
+  open seeded reports in its separate store.
+- Final D06 wording and D07 real-file evidence policy remain pending. No
+  shared auth, fixtures, contracts or adapters were changed.
+
+### Phase 3 verification
+
+| Check | Result |
+| --- | --- |
+| `node scripts/harness.mjs check` and `git diff --check` | Passed. Changes stay in the technician task paths and approved Playwright spec. |
+| `node scripts/harness.mjs test --no-e2e` | Passed all 9 affected tests. The three new tests cover final validation, retry after partial photo registration, and replay after a committed completion response was lost. The replay used the original request and returned the same report. |
+| `npm run build` | Passed on Next.js 15.5.29, including lint and type checking. |
+| Technician Playwright spec | 19 passed and 1 intentional skip across desktop and mobile. Coverage includes the Phase 1 and 2 regression flows, confirmation errors, duplicate taps, status check and manual retry, report content, and denied and missing reports. The skip avoids running the three-width check twice. |
+| Full CI, full accessibility review, and Impeccable | Not run in Phase 3. |
+
+The browser run used the local production build and installed Chrome with
+the existing desktop and mobile settings. Logs:
+`test-results/pc-s1-08-phase3-build.log` and
+`test-results/pc-s1-08-phase3-browser.log`.
+
 ## Developer review guide
 
 ### Review these first
 
-- [Start Job](../../src/features/technician/job-details.tsx#L36). Check the
-  retry and reload messages and the transition to In progress.
-- [Inspection steps](../../src/features/technician/job-inspection.tsx#L17).
-  Try continuing with a missing required reading, then correct it and go back.
-- [Photo Evidence and Notes](../../src/components/technician/photo-evidence.tsx#L20).
-  Try a synthetic PNG and an unsupported text file, then remove the PNG.
-- [Browser test](../../src/app/__e2e__/technician.spec.ts#L105). Review
-  the required-field, preview and notes checks.
+- [Review and confirmation](../../src/components/technician/inspection-review.tsx).
+  Try submitting before entering the name and checking the acknowledgment.
+- [Submission and recovery](../../src/features/technician/use-inspection-submission.ts).
+  Check that the success message requires an adapter response and retry follows
+  the job-status check.
+- [Report](../../src/components/technician/report-content.tsx). Check the
+  readings, notes, confirmation and text for evidence images.
+- [Technician browser tests](../../src/app/__e2e__/technician.spec.ts). Review
+  the final validation, duplicate tap, retry and report coverage.
 
 ### You need to do or decide
 
 - Add the direct approval link if available. Tarek’s confirmation is recorded
   above.
-- Review the Phase 2 screens before approving any later phase. Confirm
+- Review the Phase 3 screens before approving any later phase. Confirm
   KAN-20’s current Jira state when access is available.
 - Have Mahdi review the eventual PR and record the result.
 
 ## Handoff
 
-Status: Phase 2 implemented. Later phases await authorization.
-Files changed: this worklog, the job detail route and feature, inspection
-components and validation helpers, and technician tests.
-Next step: Review Start Job, the checklist and Photo Evidence and Notes before
-authorizing customer confirmation and submission.
+Status: Phase 3 implemented and its targeted checks passed. Phase 4 awaits authorization.
+Files changed: this worklog, the technician flow and report routes,
+confirmation and submission components and helpers, and technician tests.
+Next step: Review confirmation, same-ID retry and the mock report before
+authorizing Phase 4.

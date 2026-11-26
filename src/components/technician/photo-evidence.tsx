@@ -11,13 +11,15 @@ type PhotoEvidenceProps = {
   jobId: string;
   photos: SelectedPhoto[];
   notes: string;
+  registeredIds: string[];
   headingRef: (heading: HTMLHeadingElement | null) => void;
   onPhotosChange: (photos: SelectedPhoto[]) => void;
   onNotesChange: (notes: string) => void;
   onBack: () => void;
+  onContinue: () => void;
 };
 
-export function PhotoEvidence({ jobId, photos, notes, headingRef, onPhotosChange, onNotesChange, onBack }: PhotoEvidenceProps) {
+export function PhotoEvidence({ jobId, photos, notes, registeredIds, headingRef, onPhotosChange, onNotesChange, onBack, onContinue }: PhotoEvidenceProps) {
   const [errors, setErrors] = useState<string[]>([]);
 
   function selectFiles(files: FileList) {
@@ -61,12 +63,13 @@ export function PhotoEvidence({ jobId, photos, notes, headingRef, onPhotosChange
             <li key={photo.id} className="min-w-0 space-y-2 rounded-pc-control border border-pc-border p-3">
               <PhotoPreview file={photo.file} />
               <p className="break-words text-sm font-semibold">{photo.file.name}</p>
-              <p className="text-sm text-pc-muted">Selected</p>
+              <p className="text-sm text-pc-muted">{registeredIds.includes(photo.id) ? "Added (demo)" : "Selected"}</p>
               <label className="block text-sm font-semibold" htmlFor={`caption-${photo.id}`}>Caption for photo {index + 1} (optional)</label>
               <input
                 id={`caption-${photo.id}`}
                 className={inputClass}
                 value={photo.caption}
+                readOnly={registeredIds.includes(photo.id)}
                 maxLength={200}
                 onChange={(event) => {
                   const caption = event.currentTarget.value;
@@ -99,9 +102,14 @@ export function PhotoEvidence({ jobId, photos, notes, headingRef, onPhotosChange
           onChange={(event) => onNotesChange(event.currentTarget.value)}
         />
       </div>
-      <button type="button" onClick={onBack} className="min-h-[var(--pc-control-min-height)] rounded-pc-control font-semibold text-pc-primary underline">
-        Back to Checklist
-      </button>
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <button type="button" onClick={onContinue} className="min-h-[var(--pc-control-min-height)] rounded-pc-control bg-pc-primary px-4 font-semibold text-pc-on-primary hover:bg-pc-primary-hover">
+          Continue to Confirmation
+        </button>
+        <button type="button" onClick={onBack} className="min-h-[var(--pc-control-min-height)] rounded-pc-control px-3 font-semibold text-pc-primary underline">
+          Back to Checklist
+        </button>
+      </div>
     </section>
   );
 }

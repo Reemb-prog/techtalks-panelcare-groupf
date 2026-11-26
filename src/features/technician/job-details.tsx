@@ -8,15 +8,21 @@ import type { JobListItem } from "@/types";
 import type { InspectionDraft } from "./inspection-form";
 import { JobInspection } from "./job-inspection";
 import { JobQuery } from "./job-query";
+import { useInspectionSubmission } from "./use-inspection-submission";
 
 export function JobDetails({ jobId }: { jobId: string }) {
   const { adapters: { dispatch } } = useAdapters();
-  const [draft, setDraft] = useState<InspectionDraft>({ answers: {}, notes: "", photos: [], step: "checklist" });
+  const [draft, setDraft] = useState<InspectionDraft>({
+    answers: {}, notes: "", photos: [], step: "checklist", customerName: "", acknowledged: false,
+  });
+  const submission = useInspectionSubmission(jobId);
   const [load, setLoad] = useState(() => () => dispatch.getJob(jobId));
   const [starting, setStarting] = useState(false);
   const [startError, setStartError] = useState<{ message: string; reload: boolean }>();
   const startingRef = useRef(false);
-  const hasChanges = Object.values(draft.answers).some(Boolean) || Boolean(draft.notes) || draft.photos.length > 0;
+  const hasChanges = submission.state.status !== "success"
+    && (Object.values(draft.answers).some(Boolean) || Boolean(draft.notes) || draft.photos.length > 0
+      || Boolean(draft.customerName) || draft.acknowledged);
 
   useEffect(() => {
     if (!hasChanges) return;
@@ -77,10 +83,16 @@ export function JobDetails({ jobId }: { jobId: string }) {
         errorMessage="Unable to load job details."
         deniedMessage="You don't have permission to view this job."
       >
-        {(job) => (
-          <div className={job.status === "in_progress" ? "grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)]" : "max-w-3xl"}>
+        {(job) => {
+          const recovering = submission.state.status === "pending" || submission.state.status === "error";
+          const showInspection = submission.state.status !== "success"
+            && (job.status === "in_progress" || (job.status === "completed" && recovering));
+          const reportId = submission.state.status === "success" ? submission.state.report.id : recovering ? null : job.reportId;
+          const shownStatus = submission.state.status === "success" ? "completed" : showInspection && recovering ? "in_progress" : job.status;
+          return (
+          <div className={showInspection ? "grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)]" : "space-y-5 max-w-3xl"}>
             <section aria-labelledby="job-site"
-              className={`min-w-0 space-y-4 rounded-pc-card border border-pc-border bg-pc-surface p-5 shadow-pc-card ${job.status === "in_progress" ? "lg:sticky lg:top-20 lg:col-start-2 lg:row-start-1" : ""}`}>
+              className={`min-w-0 space-y-4 rounded-pc-card border border-pc-border bg-pc-surface p-5 shadow-pc-card ${showInspection ? "lg:sticky lg:top-20 lg:col-start-2 lg:row-start-1" : ""}`}>
               <div>
                 <h2 id="job-site" className="break-words text-[length:var(--pc-type-section)] font-semibold">{job.siteLabel}</h2>
                 {job.city && <p className="mt-1 text-pc-muted">{job.city}</p>}
@@ -96,7 +108,7 @@ export function JobDetails({ jobId }: { jobId: string }) {
                 </div>
                 <div>
                   <dt className="text-sm text-pc-muted">Status</dt>
-                  <dd className="mt-1"><JobStatusBadge status={job.status} /></dd>
+                  <dd className="mt-1"><JobStatusBadge status={shownStatus} /></dd>
                 </div>
                 <div>
                   <dt className="text-sm text-pc-muted">Job ID</dt>
@@ -117,13 +129,22 @@ export function JobDetails({ jobId }: { jobId: string }) {
                 </div>
               )}
             </section>
-            {job.status === "in_progress" && (
+            {showInspection && (
               <div className="min-w-0 lg:col-start-1 lg:row-start-1">
-                <JobInspection jobId={job.id} draft={draft} setDraft={setDraft} />
+                <JobInspection jobId={job.id} draft={draft} setDraft={setDraft} submission={submission} />
               </div>
             )}
+            {reportId && (
+              <section className="space-y-3 rounded-pc-card border border-pc-border bg-pc-surface p-5">
+                {submission.state.status === "success" && <p role="status" className="font-semibold">Inspection completed (demo).</p>}
+                <Link href={`/technician/reports/${reportId}`} className="inline-flex min-h-[var(--pc-control-min-height)] items-center rounded-pc-control bg-pc-primary px-4 font-semibold text-pc-on-primary hover:bg-pc-primary-hover">
+                  View Service Report
+                </Link>
+              </section>
+            )}
           </div>
-        )}
+          );
+        }}
       </JobQuery>
     </div>
   );

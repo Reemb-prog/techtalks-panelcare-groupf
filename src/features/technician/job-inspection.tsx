@@ -4,17 +4,20 @@ import { useCallback, useRef, useState, type Dispatch, type FormEvent, type SetS
 import { useAdapters } from "@/components/layout/adapters-provider";
 import { ChecklistFields, checklistFieldId } from "@/components/technician/checklist-fields";
 import { PhotoEvidence } from "@/components/technician/photo-evidence";
+import { InspectionReview } from "@/components/technician/inspection-review";
 import type { ChecklistTemplate } from "@/types";
 import { validateChecklist, type InspectionDraft } from "./inspection-form";
 import { JobQuery } from "./job-query";
+import type { useInspectionSubmission } from "./use-inspection-submission";
 
 type JobInspectionProps = {
   jobId: string;
   draft: InspectionDraft;
   setDraft: Dispatch<SetStateAction<InspectionDraft>>;
+  submission: ReturnType<typeof useInspectionSubmission>;
 };
 
-export function JobInspection({ jobId, draft, setDraft }: JobInspectionProps) {
+export function JobInspection({ jobId, draft, setDraft, submission }: JobInspectionProps) {
   const { adapters: { inspections } } = useAdapters();
   const load = useCallback(() => inspections.getChecklistTemplate(), [inspections]);
   const stepFocusPending = useRef(false);
@@ -36,10 +39,12 @@ export function JobInspection({ jobId, draft, setDraft }: JobInspectionProps) {
         jobId={jobId}
         photos={draft.photos}
         notes={draft.notes}
+        registeredIds={submission.registeredIds}
         headingRef={focusStepHeading}
         onPhotosChange={(photos) => setDraft((previous) => ({ ...previous, photos }))}
         onNotesChange={(notes) => setDraft((previous) => ({ ...previous, notes }))}
         onBack={() => goToStep("checklist")}
+        onContinue={() => goToStep("review")}
       />
     );
   }
@@ -51,14 +56,36 @@ export function JobInspection({ jobId, draft, setDraft }: JobInspectionProps) {
       errorMessage="Unable to load the inspection checklist."
       deniedMessage="You don't have permission to view the inspection checklist."
     >
-      {(template) => (
+      {(template) => draft.step === "review" ? (
+        <InspectionReview
+          jobId={jobId}
+          template={template}
+          draft={draft}
+          headingRef={focusStepHeading}
+          state={submission.state}
+          registeredIds={submission.registeredIds}
+          onConfirmationChange={(updates) => setDraft((previous) => ({ ...previous, ...updates }))}
+          onBack={() => goToStep("photos")}
+          onEditChecklist={() => goToStep("checklist")}
+          onSubmit={(prepared) => { void submission.run(prepared); }}
+          onRetry={() => { void submission.run(); }}
+          onCheck={() => { void submission.checkJob(); }}
+          onEdit={(step) => {
+            submission.edit();
+            goToStep(step);
+          }}
+        />
+      ) : (
         <InspectionChecklist
           template={template}
           values={draft.answers}
           onChange={(itemId, value) => setDraft((previous) => ({
             ...previous, answers: { ...previous.answers, [itemId]: value },
           }))}
-          onContinue={() => goToStep("photos")}
+          onContinue={() => {
+            stepFocusPending.current = true;
+            setDraft((previous) => ({ ...previous, step: "photos", checklistVersion: template.version }));
+          }}
           headingRef={focusStepHeading}
         />
       )}

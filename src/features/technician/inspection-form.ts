@@ -12,7 +12,10 @@ export type InspectionDraft = {
   answers: Record<string, string>;
   notes: string;
   photos: SelectedPhoto[];
-  step: "checklist" | "photos";
+  step: "checklist" | "photos" | "review";
+  checklistVersion?: number;
+  customerName: string;
+  acknowledged: boolean;
 };
 
 export function validateChecklist(template: ChecklistTemplate, values: InspectionDraft["answers"]) {

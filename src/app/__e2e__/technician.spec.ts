@@ -177,6 +177,107 @@ test("offers a retry when the mock Start Job action fails", async ({ page }) => 
   await expect(page.getByRole("heading", { name: "Inspection Checklist" })).toBeVisible();
 });
 
+async function openConfirmation(page: Page, withPhoto = false) {
+  await signIn(page);
+  await page.goto(`/technician/jobs/${fixtureId("job", 7)}`);
+  await page.getByLabel(/AC and DC isolators/).selectOption("true");
+  await page.getByLabel(/Panel surface condition/).selectOption("good");
+  await page.getByLabel(/Mounting and fixings secure/).selectOption("true");
+  await page.getByLabel(/Inverter shows no active faults/).selectOption("false");
+  await page.getByLabel(/String DC voltage \(V\)/).fill("0");
+  await page.getByLabel(/AC output at time of visit \(kW\)/).fill("2.5");
+  await page.getByLabel(/Panel cleaning performed/).selectOption("none");
+  await page.getByRole("button", { name: "Continue to Photo Evidence" }).click();
+  if (withPhoto) {
+    await page.getByLabel("Inspection notes (optional)").fill("Checked the demo array.");
+    await page.getByLabel("Add photos").setInputFiles({
+      name: "panel.png",
+      mimeType: "image/png",
+      buffer: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=", "base64"),
+    });
+    await page.getByLabel("Caption for photo 1 (optional)").fill("Panel after review");
+  }
+  await page.getByRole("button", { name: "Continue to Confirmation" }).click();
+  await expect(page.getByRole("heading", { name: "Review & Confirm" })).toBeFocused();
+}
+
+test("validates confirmation and opens the report after mock completion", async ({ page }) => {
+  await openConfirmation(page, true);
+  const submit = page.getByRole("button", { name: "Submit Inspection", exact: true });
+  const name = page.getByLabel("Customer name", { exact: true });
+  const acknowledges = page.getByRole("checkbox", { name: /acknowledges/ });
+  await submit.click();
+  await expect(name).toBeFocused();
+  await expect(name).toHaveAttribute("aria-invalid", "true");
+  await name.fill("Demo Customer");
+  await submit.click();
+  await expect(acknowledges).toBeFocused();
+  await expect(acknowledges).toHaveAttribute("aria-invalid", "true");
+  await expect(page.getByText("Inspection completed (demo).")).toHaveCount(0);
+  await acknowledges.check();
+  await submit.evaluate((button: HTMLButtonElement) => {
+    button.click();
+    button.click();
+  });
+  await expect(page.getByText("Inspection completed (demo).")).toBeVisible();
+  await page.getByRole("link", { name: "View Service Report" }).click();
+  await expect(page.getByRole("heading", { name: "Service Report", exact: true })).toBeVisible();
+  const report = page.getByRole("main");
+  await expect(report.getByText("0 V", { exact: true })).toBeVisible();
+  await expect(report.getByText("No", { exact: true })).toBeVisible();
+  await expect(report.getByText("2.5 kW", { exact: true })).toBeVisible();
+  await expect(report.getByText("Checked the demo array.")).toBeVisible();
+  const photos = report.getByRole("region", { name: "Photo evidence" });
+  await expect(photos.getByRole("listitem")).toHaveCount(1);
+  await expect(photos.getByText("Panel after review")).toBeVisible();
+  await expect(photos.getByText("Image preview unavailable in this demo.")).toBeVisible();
+  await expect(report.getByText("Demo Customer", { exact: true })).toBeVisible();
+  const reportPath = new URL(page.url()).pathname;
+  await report.getByRole("link", { name: "Back to My Jobs" }).click();
+  await page.getByRole("link", { name: /^View Job/ }).and(page.locator(`[href="/technician/jobs/${fixtureId("job", 7)}"]`)).click();
+  await expect(page.getByRole("link", { name: "View Service Report" })).toHaveAttribute("href", reportPath);
+  await expect(page.getByRole("button", { name: "Submit Inspection" })).toHaveCount(0);
+});
+
+test("checks job status before retrying an unconfirmed submission", async ({ page }) => {
+  await page.clock.install({ time: new Date("2026-11-26T12:00:00Z") });
+  await openConfirmation(page);
+  const mockData = page.getByLabel("Mock data");
+  await page.getByLabel("Customer name", { exact: true }).fill("Demo Customer");
+  await page.getByRole("checkbox", { name: /acknowledges/ }).check();
+  await mockData.selectOption("slow");
+  await page.getByRole("button", { name: "Submit Inspection", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Submitting inspection…" })).toBeDisabled();
+  await mockData.selectOption("error");
+  await expect(page.getByText("Unable to load job details.")).toBeVisible();
+  await page.clock.runFor(2500);
+  await mockData.selectOption("ok");
+  await expect(page.getByText(/Submission status unknown/)).toBeVisible();
+  await expect(page.getByRole("link", { name: "View Service Report" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Retry submission" })).toHaveCount(0);
+  await page.getByRole("button", { name: "Check job status" }).click();
+  await expect(page.getByText(/Job status checked/)).toBeVisible();
+  await page.getByRole("button", { name: "Retry submission" }).click();
+  await expect(page.getByText("Inspection completed (demo).")).toBeVisible();
+});
+
+test("shows seeded report data to a demo coordinator and hides missing reports", async ({ page }) => {
+  await signIn(page, "coordinator");
+  await page.goto(`/reports/${fixtureId("report", 1)}`);
+  const results = page.getByRole("region", { name: "Inspection results" });
+  await expect(results).toBeVisible();
+  const mockData = page.getByLabel("Mock data");
+  await mockData.selectOption("denied");
+  await expect(page.getByText("You don't have permission to view this report.")).toBeVisible();
+  await expect(results).toHaveCount(0);
+  await mockData.selectOption("ok");
+  await expect(results).toBeVisible();
+  await page.goto(`/reports/${fixtureId("report", 999)}`);
+  const unavailable = page.locator("#main").getByRole("alert");
+  await expect(unavailable.getByRole("heading", { name: "Report unavailable" })).toBeVisible();
+  await expect(results).toHaveCount(0);
+});
+
 test("job list and details fit the three review widths", async ({ page, isMobile }, info) => {
   test.skip(isMobile, "The desktop project explicitly sets all three CSS viewports.");
   await signIn(page);

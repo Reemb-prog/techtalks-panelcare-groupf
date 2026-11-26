@@ -9,10 +9,11 @@ type JobQueryProps<T> = {
   loadingMessage: string;
   errorMessage: string;
   deniedMessage: string;
+  unavailable?: { title: string; message: string };
   children: (data: T) => ReactNode;
 };
 
-export function JobQuery<T>({ load, loadingMessage, errorMessage, deniedMessage, children }: JobQueryProps<T>) {
+export function JobQuery<T>({ load, loadingMessage, errorMessage, deniedMessage, unavailable, children }: JobQueryProps<T>) {
   const { dataVersion } = useAdapters();
   const [attempt, setAttempt] = useState(0);
   const [response, setResponse] = useState<{
@@ -56,8 +57,8 @@ export function JobQuery<T>({ load, loadingMessage, errorMessage, deniedMessage,
   if (result.error.code === "NOT_FOUND") {
     return (
       <div role="alert" className={panel}>
-        <h2 className="font-semibold">Job unavailable</h2>
-        <p>This job could not be found.</p>
+        <h2 className="font-semibold">{unavailable?.title ?? "Job unavailable"}</h2>
+        <p>{unavailable?.message ?? "This job could not be found."}</p>
       </div>
     );
   }
