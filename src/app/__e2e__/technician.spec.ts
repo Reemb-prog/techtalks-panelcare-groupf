@@ -22,7 +22,7 @@ test("lists the technician's jobs and opens the selected job", async ({ page }) 
   const site = await card.getByRole("heading").innerText();
   await expect(card.getByText("Assigned", { exact: true })).toBeVisible();
   await assignedJobLink.click();
-  await expect(page).toHaveURL(new RegExp(`${assignedJobPath}$`));
+  await expect(page).toHaveURL(new RegExp(`${assignedJobPath}$`), { timeout: 20_000 });
   await expect(page.getByRole("heading", { name: "Job Details" })).toBeVisible();
   const detail = page.getByRole("region", { name: site });
   await expect(detail.getByText(assignedJobId)).toBeVisible();
@@ -100,6 +100,81 @@ test("redirects a signed-out visitor and denies a coordinator in the technician 
     await expect(main.getByRole("list", { name: "Assigned jobs" })).toHaveCount(0);
     await expect(main.getByText(assignedJobId)).toHaveCount(0);
   }
+});
+
+test("starts a job and validates readings before opening photos and notes", async ({ page }) => {
+  await signIn(page);
+  await page.goto(assignedJobPath);
+  await expect(page.getByRole("heading", { name: "Inspection Checklist" })).toHaveCount(0);
+  await page.getByRole("button", { name: "Start Job", exact: true }).click();
+  await expect(page.getByText("In progress", { exact: true })).toBeVisible();
+
+  const safety = page.getByLabel(/AC and DC isolators/);
+  const output = page.getByLabel(/AC output at time of visit \(kW\)/);
+  const next = page.getByRole("button", { name: "Continue to Photo Evidence" });
+  await next.click();
+  await expect(safety).toBeFocused();
+  await expect(safety).toHaveAttribute("aria-invalid", "true");
+  await safety.selectOption("false");
+  await page.getByLabel(/Panel surface condition/).selectOption("good");
+  await page.getByLabel(/Mounting and fixings secure/).selectOption("true");
+  await page.getByLabel(/Inverter shows no active faults/).selectOption("true");
+  await page.getByLabel(/String DC voltage \(V\)/).fill("0");
+  await output.fill("1001");
+  await page.getByLabel(/Panel cleaning performed/).selectOption("none");
+  await next.click();
+  await expect(output).toBeFocused();
+  await expect(page.getByText("Must be at most 1000 kW.")).toBeVisible();
+  await expect(safety).toHaveValue("false");
+  await output.fill("0");
+  await next.click();
+  await expect(page.getByRole("heading", { name: "Photo Evidence and Notes" })).toBeFocused();
+
+  const notes = page.getByLabel("Inspection notes (optional)");
+  const picker = page.getByLabel("Add photos");
+  await notes.fill("Demo visit note");
+  await picker.setInputFiles([
+    { name: "visit.txt", mimeType: "text/plain", buffer: Buffer.from("demo") },
+    {
+      name: "panel.png",
+      mimeType: "image/png",
+      buffer: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=", "base64"),
+    },
+  ]);
+  await expect(page.getByText("visit.txt: Use a JPEG, PNG or WebP image.")).toBeVisible();
+  const preview = page.getByRole("img", { name: "Selected photo: panel.png" });
+  await expect(preview).toBeVisible();
+  await expect.poll(() => preview.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
+  await page.getByLabel("Caption for photo 1 (optional)").fill("Demo panel");
+  await page.getByRole("button", { name: "Back to Checklist" }).click();
+  await expect(page.getByRole("heading", { name: "Inspection Checklist" })).toBeFocused();
+  await expect(output).toHaveValue("0");
+  await next.click();
+  await expect(notes).toHaveValue("Demo visit note");
+  await expect(page.getByLabel("Caption for photo 1 (optional)")).toHaveValue("Demo panel");
+  await expect(preview).toBeVisible();
+  await page.getByRole("button", { name: /Remove Photo 1: panel.png/ }).click();
+  await expect(preview).toHaveCount(0);
+  await expect(page.getByText("0 of 10 selected.", { exact: false })).toBeVisible();
+});
+
+test("offers a retry when the mock Start Job action fails", async ({ page }) => {
+  await page.clock.install({ time: new Date("2026-11-26T12:00:00Z") });
+  await signIn(page);
+  await page.goto(assignedJobPath);
+  const mockData = page.getByLabel("Mock data");
+  const start = page.getByRole("button", { name: "Start Job", exact: true });
+  await mockData.selectOption("slow");
+  await start.click();
+  await expect(page.getByRole("button", { name: "Starting job…" })).toBeDisabled();
+  await mockData.selectOption("error");
+  await expect(page.getByText("Unable to load job details.")).toBeVisible();
+  await page.clock.runFor(2500);
+  await mockData.selectOption("ok");
+  await expect(page.getByText("Unable to start the job. Try again.")).toBeVisible();
+  await expect(page.getByText("Assigned", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Retry Start Job" }).click();
+  await expect(page.getByRole("heading", { name: "Inspection Checklist" })).toBeVisible();
 });
 
 test("job list and details fit the three review widths", async ({ page, isMobile }, info) => {

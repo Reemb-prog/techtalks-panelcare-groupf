@@ -5,7 +5,7 @@ Jira: [KAN-20](https://techtalks-panelcare.atlassian.net/browse/KAN-20) | PR: no
 Planned start: D5 (Nov 24, 2026) | Review-ready target: D10 (Nov 29, 2026)
 Branch: `s1/tarek/pc-s1-08` | Base for Phase 1: `04b091d`
 Plan prepared: Nov 25, 2026 | Owner plan approval: Tarek, Nov 25, 2026
-Current implementation authorization: Phase 1 only
+Current implementation authorization: Phases 1 and 2. Tarek approved Phase 2 on Nov 26, 2026.
 
 ## Goal and scope
 
@@ -37,7 +37,7 @@ sprint and readiness in Jira before implementation.
 - **Plan approval:** Tarek approved the plan and the task-owned Playwright path
   on Nov 25, 2026. This is routine owner self-approval under
   [D11](../../docs/DECISIONS.md#decisions-approvals-and-material-change-control).
-  The current authorization is limited to Phase 1.
+  Tarek added Phase 2 authorization on Nov 26, 2026.
   Changes to shared auth, contracts, design tokens or other shared files require
   separate lead approval and coordination with the file owner.
 - **PR review:** Mahdi is the assigned non-author reviewer. Record the actual
@@ -56,9 +56,10 @@ sprint and readiness in Jira before implementation.
 | Live Jira | Unavailable. The repository baseline lists the task, assignee, sprint and dependencies. |
 | Visual direction | Confirmed by Tarek in the PC-S1-08 conversation on Nov 25, 2026. |
 
-Phase 1 covers the technician layout, My Jobs and Job Details, their loading,
-empty, error and permission-denied states, and relevant tests. Later phases
-remain planned. The Start Job action and inspection steps belong to Phase 2.
+Phase 1 covered the technician layout, My Jobs and Job Details, their loading,
+empty, error and permission-denied states, and relevant tests. Phase 2 adds the
+Start Job action and inspection steps. Customer confirmation, submission and
+reports remain planned.
 
 ## Allowed paths
 
@@ -249,31 +250,71 @@ message. Status chips pair text with existing design token colors.
 This phase reads jobs only. Start Job, form steps, reports and the completion
 journey remain in later phases.
 
+## Phase 2 scope
+
+Add the version-checked Start Job action, then use the mock checklist template
+to collect and validate answers. Keep the notes and photo selections in memory
+on the job route. Validate selected files with the existing photo schema and
+show local previews. Defer photo registration until the submission flow can
+retain the photo IDs for completion. The mock has no photo deletion endpoint,
+so selection and removal in this phase leave the mock store unchanged.
+Customer confirmation, submission and reports remain for later work.
+
+## Phase 2 implementation
+
+- Job Details starts an assigned job with its current version. It waits for
+  the mock adapter and then reloads the job before showing the checklist.
+  Failed starts have a retry. A conflict or uncertain result asks for a reload.
+- The checklist comes from the mock template. It shows reading units and
+  required fields, keeps valid answers, and focuses the first invalid field.
+- Photo Evidence and Notes keeps selections, captions and notes when moving
+  between steps. The picker checks allowed formats, the 5 MB file limit and
+  the 10-photo total. Each selected file gets its own preview and remove action.
+- The form uses open-page memory. Back to My Jobs and page unload warn when
+  there are unsent changes.
+
+### Phase 2 verification (Nov 26, 2026)
+
+| Check | Result |
+| --- | --- |
+| `node scripts/harness.mjs check` and `git diff --check` | Passed. The work stays in the task paths and the approved technician spec. |
+| `node scripts/harness.mjs test --no-e2e` | Passed. Six unit tests covered required and out-of-range readings, false and zero answers, photo type and size, and the selection count. |
+| `npm run lint`, `npm run typecheck`, and `npm run build` | Passed using the locked dependencies, including Next.js 15.5.29. |
+| Technician Playwright spec | 13 passed and 1 intentional skip across desktop and mobile Chrome. The skip avoids a duplicate mobile run of the three-width test. Start Job, retry, keyboard focus on invalid fields, local photo previews, and keeping notes and captions between steps passed. |
+| Full CI, full accessibility review, and Impeccable | Not run in this phase. |
+
+The final browser run used a local production build and an ignored config
+that selects installed Chrome. Dev-server attempts exposed cold route
+timeouts and a test clock that could expire the demo session. The retry test
+now sets its clock before signing in. Logs are in
+`test-results/pc-s1-08-phase2-build.log` and
+`test-results/pc-s1-08-phase2-production-run.log`.
+
 ## Developer review guide
 
 ### Review these first
 
-- [Technician layout](../../src/app/technician/layout.tsx#L8). Check the demo
-  role boundary and reuse of the shared shell.
-- [My Jobs](../../src/features/technician/job-list.tsx#L10) and
-  [Job Details](../../src/features/technician/job-details.tsx#L9). Check the
-  summary, labels and Back to My Jobs link.
-- [Job read states](../../src/features/technician/job-query.tsx#L21). Check the
-  retry copy and that denied or unavailable jobs reveal no details.
-- [Browser tests](../../src/app/__e2e__/technician.spec.ts#L14). Check that
-  the job, error and role scenarios match the design.
+- [Start Job](../../src/features/technician/job-details.tsx#L36). Check the
+  retry and reload messages and the transition to In progress.
+- [Inspection steps](../../src/features/technician/job-inspection.tsx#L17).
+  Try continuing with a missing required reading, then correct it and go back.
+- [Photo Evidence and Notes](../../src/components/technician/photo-evidence.tsx#L20).
+  Try a synthetic PNG and an unsupported text file, then remove the PNG.
+- [Browser test](../../src/app/__e2e__/technician.spec.ts#L105). Review
+  the required-field, preview and notes checks.
 
 ### You need to do or decide
 
 - Add the direct approval link if available. Tarek’s confirmation is recorded
   above.
-- Review the Phase 1 screens before approving any later phase. Confirm
+- Review the Phase 2 screens before approving any later phase. Confirm
   KAN-20’s current Jira state when access is available.
 - Have Mahdi review the eventual PR and record the result.
 
 ## Handoff
 
-Status: Phase 1 implementation complete. Later phases await authorization.
-Files changed: this worklog, the Phase 1 routes, components and browser spec.
-Next step: Review the Phase 1 screens and evidence before proceeding to
-Start Job and the checklist.
+Status: Phase 2 implemented. Later phases await authorization.
+Files changed: this worklog, the job detail route and feature, inspection
+components and validation helpers, and technician tests.
+Next step: Review Start Job, the checklist and Photo Evidence and Notes before
+authorizing customer confirmation and submission.
