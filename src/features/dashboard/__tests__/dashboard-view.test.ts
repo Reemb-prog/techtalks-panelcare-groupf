@@ -102,7 +102,8 @@ describe("buildCards tones", () => {
 
 describe("date formatting", () => {
   it("formats date-only values without shifting the day", () => {
-    expect(formatLongDate("2026-11-22")).toBe("Sunday 22 November 2026");
+    // ICU 76+ inserts a comma after the weekday; older ICU does not. Both show the same day.
+    expect(formatLongDate("2026-11-22")).toMatch(/^Sunday,? 22 November 2026$/);
     expect(formatShortDate("2026-12-01")).toMatch(/^Tue,? 1 Dec$/);
   });
 
