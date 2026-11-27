@@ -18,7 +18,7 @@ test("filter to unassigned visits and assign a technician", async ({ page }) => 
 
   await page.getByLabel("Technician").selectOption({ label: "Not assigned" });
   await expect(page).toHaveURL(/technician=unassigned/);
-  const table = page.getByRole("region", { name: "Visits" });
+  const table = page.getByRole("table", { name: "Visits", exact: true });
   await expect(table.getByRole("row").nth(1)).toContainText("Not assigned");
 
   await table.getByRole("button", { name: /^Manage visit on/ }).first().click();
@@ -36,16 +36,17 @@ test("filter to unassigned visits and assign a technician", async ({ page }) => 
 });
 
 test("a clashing reschedule is refused and nothing changes; cancel then reactivate", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-11-27T12:00:00Z"));
   await openBoard(page, `?status=all&job=${JOB_3}`);
   const drawer = page.getByRole("dialog", { name: "Visit details" });
   await expect(drawer).toContainText("31 Dec 2026");
 
-  // 30 Nov 2026 is already used by the same plan (or, once that date has passed, is in the past): refused either way.
+  // This future date is already used by another visit for the same plan.
   await drawer.getByRole("button", { name: "Reschedule" }).click();
   await drawer.getByLabel("New date").fill("2026-11-30");
   await drawer.getByLabel("Reason (kept in the visit history)").fill("Customer request");
   await drawer.getByRole("button", { name: "Reschedule" }).last().click();
-  await expect(drawer.getByRole("alert")).toContainText("Not saved");
+  await expect(drawer.getByRole("alert")).toContainText("This plan already has a visit on that date. Nothing was changed.");
   await expect(drawer).toContainText("31 Dec 2026");
 
   await drawer.getByRole("button", { name: "Cancel visit" }).first().click();
@@ -55,12 +56,16 @@ test("a clashing reschedule is refused and nothing changes; cancel then reactiva
   await drawer.getByRole("button", { name: "Cancel visit" }).last().click();
   await expect(drawer.getByRole("status")).toContainText("The visit was cancelled.");
   await expect(drawer).toContainText("Site closed for renovation");
-  await expect(drawer.getByRole("button", { name: "Reactivate" })).toBeVisible();
+  await drawer.getByRole("button", { name: "Reactivate" }).click();
+  await drawer.getByLabel("Reason (kept in the visit history)").fill("Site reopened");
+  await drawer.getByRole("button", { name: "Reactivate" }).last().click();
+  await expect(drawer.getByRole("status")).toContainText("The visit was reactivated.");
+  await expect(drawer).toContainText("31 Dec 2026");
 });
 
 test("completed visits are read-only and link to their report", async ({ page }) => {
   await openBoard(page, "?status=completed");
-  await page.getByRole("region", { name: "Visits" }).getByRole("button", { name: /^Manage visit on/ }).first().click();
+  await page.getByRole("table", { name: "Visits", exact: true }).getByRole("button", { name: /^Manage visit on/ }).first().click();
   const drawer = page.getByRole("dialog", { name: "Visit details" });
   await expect(drawer.getByRole("region", { name: "This visit is completed" })).toBeVisible();
   await expect(drawer.getByRole("link", { name: "Open service report" })).toHaveAttribute("href", /\/reports\//);
@@ -70,7 +75,11 @@ test("completed visits are read-only and link to their report", async ({ page })
 test("bad filter values in the link are reported, not fatal", async ({ page }) => {
   await openBoard(page, "?status=bogus&from=2026-02-30");
   await expect(page.getByRole("region", { name: "Some filters in the link were ignored" })).toContainText("not recognised");
-  await expect(page.getByRole("region", { name: "Visits" })).toBeVisible();
+  const scrollRegion = page.getByRole("region", { name: "Visits", exact: true });
+  await expect(scrollRegion.getByRole("table", { name: "Visits", exact: true })).toBeVisible();
+  await expect(scrollRegion).toHaveAttribute("tabindex", "0");
+  await scrollRegion.focus();
+  await expect(scrollRegion).toBeFocused();
 });
 
 test("empty, error and denied mock scenarios", async ({ page }) => {

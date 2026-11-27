@@ -236,13 +236,13 @@ function BoardView({ board, filters, today, onOpen, onPage }: {
           </Link>
         </Panel>
       ) : (
-        <section aria-labelledby="visits-heading" className="rounded-pc-panel border border-pc-border bg-pc-surface shadow-pc-card">
+        <section className="rounded-pc-panel border border-pc-border bg-pc-surface shadow-pc-card">
           <h2 id="visits-heading" className="sr-only">
             Visits
           </h2>
           {/* relative: keeps the screen-reader-only "Actions" header inside the scroll box (it widened the page at 375 px). */}
           <div role="region" aria-labelledby="visits-heading" tabIndex={0} className="relative overflow-x-auto">
-            <table className="w-full min-w-[40rem] text-left text-[length:var(--pc-type-control)] leading-[var(--pc-line-control)]">
+            <table aria-labelledby="visits-heading" className="w-full min-w-[40rem] text-left text-[length:var(--pc-type-control)] leading-[var(--pc-line-control)]">
               <thead className="text-pc-muted">
                 <tr>
                   <th scope="col" className="px-4 py-2 font-semibold sm:px-6">Date</th>
