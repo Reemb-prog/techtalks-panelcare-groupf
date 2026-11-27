@@ -2,7 +2,7 @@ import { completeJobSchema, registerPhotoSchema } from "../../lib/validations/in
 import { parseRequest } from "../../lib/validations/errors";
 import { MAX_PHOTOS_PER_JOB } from "../../types";
 import type {
-  ApiResult, ChecklistTemplate, CompleteJobRequest, FieldErrors, InspectionsAdapter,
+  ApiErrorBody, ApiResult, ChecklistTemplate, CompleteJobRequest, FieldErrors, InspectionsAdapter,
   RegisterPhotoRequest, ServiceReport,
 } from "../../types";
 import { validateChecklist, type InspectionDraft } from "./inspection-form";
@@ -97,6 +97,20 @@ export async function submitMockInspection(
   } catch {
     return { phase: "unknown-completion" };
   }
+}
+
+export type FailureAction = "check" | "retry" | "edit" | "reload" | "none";
+
+/** What the technician can do after the adapter rejects a photo or the completion. */
+export function describeFailure(phase: "photo" | "completion", error: ApiErrorBody): { message: string; action: FailureAction } {
+  if (error.code === "UNAUTHENTICATED" || error.code === "FORBIDDEN" || error.code === "NOT_FOUND") {
+    return {
+      message: phase === "photo" ? "You don't have permission to add photos to this job." : "You don't have permission to complete this job.",
+      action: "none",
+    };
+  }
+  // CONFLICT means the job or checklist changed elsewhere: only a fresh copy of the job can resolve it.
+  return { message: error.message, action: error.code === "CONFLICT" ? "reload" : error.code === "INTERNAL" ? "retry" : "edit" };
 }
 
 export function groupReviewErrors(errors: FieldErrors) {

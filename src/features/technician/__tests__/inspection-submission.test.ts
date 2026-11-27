@@ -3,7 +3,7 @@ import { createMockAdapters } from "../../../lib/adapters";
 import { CHECKLIST_TEMPLATE_V1, FIXTURE_NOW, fixtureId } from "../../../lib/fixtures";
 import type { ApiResult, InspectionPhoto } from "../../../types";
 import type { InspectionDraft } from "../inspection-form";
-import { prepareInspection, submitMockInspection, type SubmissionAttempt } from "../inspection-submission";
+import { describeFailure, prepareInspection, submitMockInspection, type SubmissionAttempt } from "../inspection-submission";
 
 const jobId = fixtureId("job", 7);
 const submissionId = "0000eeee-0000-4000-8000-000000000001";
@@ -102,5 +102,30 @@ describe("inspection submission", () => {
     expect(registerPhoto).toHaveBeenCalledTimes(2);
     expect(completeJob.mock.calls[1][1]).toBe(completeJob.mock.calls[0][1]);
     expect(completeJob.mock.calls[1][1].idempotencyKey).toBe(submissionId);
+  });
+});
+
+describe("submission failure actions", () => {
+  it.each([
+    ["completion", "CONFLICT", "reload"],
+    ["photo", "CONFLICT", "reload"],
+    ["completion", "VALIDATION_FAILED", "edit"],
+    ["photo", "VALIDATION_FAILED", "edit"],
+    ["photo", "INTERNAL", "retry"],
+    ["completion", "FORBIDDEN", "none"],
+    ["photo", "NOT_FOUND", "none"],
+  ] as const)("maps a %s %s to %s", (phase, code, action) => {
+    expect(describeFailure(phase, { code, message: "Adapter message." }).action).toBe(action);
+  });
+
+  it("offers a reload when another submission already completed the job", async () => {
+    const { adapters, attempt, registered } = setup();
+    expect(await submitMockInspection(jobId, adapters.inspections, attempt, registered, () => {})).toMatchObject({ phase: "completion", result: { ok: true } });
+    const second = prepareInspection(jobId, CHECKLIST_TEMPLATE_V1, draft, "0000eeee-0000-4000-8000-000000000002");
+    if (!second.ok) throw new Error("Expected the demo inspection to pass validation.");
+    const outcome = await submitMockInspection(jobId, adapters.inspections, { prepared: second.prepared }, registered, () => {});
+    if (outcome.phase !== "completion" || outcome.result.ok) throw new Error("Expected a rejected completion.");
+    expect(outcome.result.error.code).toBe("CONFLICT");
+    expect(describeFailure("completion", outcome.result.error)).toEqual({ message: "This job is already completed.", action: "reload" });
   });
 });

@@ -15,9 +15,10 @@ type JobInspectionProps = {
   draft: InspectionDraft;
   setDraft: Dispatch<SetStateAction<InspectionDraft>>;
   submission: ReturnType<typeof useInspectionSubmission>;
+  onReload: () => void;
 };
 
-export function JobInspection({ jobId, draft, setDraft, submission }: JobInspectionProps) {
+export function JobInspection({ jobId, draft, setDraft, submission, onReload }: JobInspectionProps) {
   const { adapters: { inspections } } = useAdapters();
   const load = useCallback(() => inspections.getChecklistTemplate(), [inspections]);
   const stepFocusPending = useRef(false);
@@ -71,9 +72,10 @@ export function JobInspection({ jobId, draft, setDraft, submission }: JobInspect
           onRetry={() => { void submission.run(); }}
           onCheck={() => { void submission.checkJob(); }}
           onEdit={(step) => {
-            submission.edit();
+            submission.reset();
             goToStep(step);
           }}
+          onReload={onReload}
         />
       ) : (
         <InspectionChecklist

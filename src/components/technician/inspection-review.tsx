@@ -25,11 +25,12 @@ type ReviewProps = {
   onRetry: () => void;
   onCheck: () => void;
   onEdit: (step: InspectionDraft["step"]) => void;
+  onReload: () => void;
 };
 
 export function InspectionReview({
   jobId, template, draft, state, registeredIds, headingRef, onConfirmationChange,
-  onBack, onEditChecklist, onSubmit, onRetry, onCheck, onEdit,
+  onBack, onEditChecklist, onSubmit, onRetry, onCheck, onEdit, onReload,
 }: ReviewProps) {
   const [errors, setErrors] = useState<FieldErrors>({});
   const serverErrors = state.status === "error" ? state.errors : undefined;
@@ -143,6 +144,7 @@ export function InspectionReview({
         {state.status === "pending" && <button className={`${primaryClass} opacity-60`} type="button" disabled>{state.message}</button>}
         {state.status === "error" && state.action === "check" && <button className={primaryClass} type="button" onClick={onCheck}>Check job status</button>}
         {state.status === "error" && state.action === "retry" && <button className={primaryClass} type="button" onClick={onRetry}>Retry submission</button>}
+        {state.status === "error" && state.action === "reload" && <button className={primaryClass} type="button" onClick={onReload}>Reload job</button>}
         {state.status === "error" && state.action === "edit" && (
           <button className={primaryClass} type="button" onClick={() => onEdit(checklist ? "checklist" : evidence.length || state.photoId ? "photos" : "review")}>
             Edit inspection

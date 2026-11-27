@@ -131,7 +131,11 @@ export function JobDetails({ jobId }: { jobId: string }) {
             </section>
             {showInspection && (
               <div className="min-w-0 lg:col-start-1 lg:row-start-1">
-                <JobInspection jobId={job.id} draft={draft} setDraft={setDraft} submission={submission} />
+                <JobInspection jobId={job.id} draft={draft} setDraft={setDraft} submission={submission}
+                  onReload={() => {
+                    submission.reset();
+                    reloadJob();
+                  }} />
               </div>
             )}
             {reportId && (

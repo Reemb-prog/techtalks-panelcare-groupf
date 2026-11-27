@@ -3,12 +3,12 @@
 import { useRef, useState } from "react";
 import { useAdapters } from "@/components/layout/adapters-provider";
 import type { FieldErrors, ServiceReport } from "@/types";
-import { submitMockInspection, type PreparedInspection, type SubmissionAttempt } from "./inspection-submission";
+import { describeFailure, submitMockInspection, type FailureAction, type PreparedInspection, type SubmissionAttempt } from "./inspection-submission";
 
 type SubmissionFailure = {
   status: "error";
   message: string;
-  action: "check" | "retry" | "edit" | "none";
+  action: FailureAction;
   photoId?: string;
   photoStatusUnknown?: boolean;
   errors?: FieldErrors;
@@ -44,14 +44,7 @@ export function useInspectionSubmission(jobId: string) {
       });
 
       if (outcome.phase === "photo") {
-        const { error } = outcome.result;
-        const accessDenied = ["UNAUTHENTICATED", "FORBIDDEN", "NOT_FOUND"].includes(error.code);
-        setState({
-          status: "error",
-          message: accessDenied ? "You don't have permission to add photos to this job." : error.message,
-          photoId: outcome.selectionId,
-          action: accessDenied ? "none" : error.code === "INTERNAL" ? "retry" : "edit",
-        });
+        setState({ status: "error", ...describeFailure("photo", outcome.result.error), photoId: outcome.selectionId });
       } else if (outcome.phase === "unknown-photo") {
         setState({
           status: "error",
@@ -64,14 +57,7 @@ export function useInspectionSubmission(jobId: string) {
         setState({ status: "success", report: outcome.result.data });
       } else if (outcome.phase === "completion" && !outcome.result.ok && outcome.result.error.code !== "INTERNAL") {
         const { error } = outcome.result;
-        const editable = error.code === "VALIDATION_FAILED";
-        const accessDenied = ["UNAUTHENTICATED", "FORBIDDEN", "NOT_FOUND"].includes(error.code);
-        setState({
-          status: "error",
-          message: accessDenied ? "You don't have permission to complete this job." : error.message,
-          action: editable ? "edit" : "none",
-          errors: error.fieldErrors,
-        });
+        setState({ status: "error", ...describeFailure("completion", error), errors: error.fieldErrors });
       } else {
         setState({
           status: "error",
@@ -109,11 +95,12 @@ export function useInspectionSubmission(jobId: string) {
     }
   }
 
-  function edit() {
-    if (busy.current || state.status !== "error" || state.action !== "edit") return;
+  /** Drops the rejected attempt so the next submit gets a new submission ID. */
+  function reset() {
+    if (busy.current || state.status !== "error" || (state.action !== "edit" && state.action !== "reload")) return;
     attempt.current = null;
     setState({ status: "idle" });
   }
 
-  return { state, registeredIds, run, checkJob, edit };
+  return { state, registeredIds, run, checkJob, reset };
 }
