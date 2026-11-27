@@ -84,6 +84,29 @@ Task test hint: Component tests for state changes and accessibility; mocked disp
 * Skipped paths: none.
 
 ## Evidence (Passed/Failed/Not run/Blocked; never claim an unexecuted check)
+
+### Dispatch follow-up plan
+
+The lead directed this follow-up on the existing PC-S1-07 branch. Reem will open the PR with an independent reviewer because GitHub is authenticated as Reem.
+
+1. Fix the reschedule regression test. Freeze the browser date before the occupied fixture date, assert the conflict and unchanged date, then complete cancel and reactivate. The fixed clock affects only this test. Run the dispatch spec on desktop and mobile before changing the landmarks.
+2. Retain the focusable scroll region and give the visits table a discoverable name. Remove the redundant outer landmark and target the table in the browser tests. Check focus, accessibility semantics, invalid-filter recovery, assignment and the report link on both projects.
+3. Recheck the two desktop cases that previously timed out during cold compilation. Keep timeouts and shared configuration unchanged if the cases pass.
+
+### Dispatch follow-up evidence
+
+* Focused Playwright conflict case, desktop and mobile: **Passed**, 2/2 before the landmark change.
+* Dispatch Playwright spec, desktop and mobile: **Passed**, 10/10 after the landmark change. Covers assignment, a refused conflict with unchanged date, cancel and reactivate, read-only report links, invalid-filter recovery, a named table inside one focusable Visits region, and empty/error/denied scenarios. The browser checks use synthetic mock data.
+* Desktop mock sign-in recheck: **Passed**, 1/1. The previously timed-out desktop assignment case also passed in the dispatch suite. The runs used a 90-second CLI timeout for cold route compilation.
+* `node scripts/harness.mjs test --no-e2e`: related Vitest found no direct test imports for the screen. The Playwright runs above cover the changed markup through the app.
+* `node scripts/harness.mjs check`: local ownership check blocked in the Reem checkout, which was explicitly directed to use the existing Rand branch. The same check in CI mode passed the branch and scope checks.
+* `node scripts/ci.mjs`: harness validation, lint, type checking, and 166 Vitest tests **Passed**. The build stage hit a Windows permission error in generated `.next` files. `npm run build` retried with access to those files **Passed**.
+
+### Dispatch follow-up developer review guide
+
+* Review `src/app/__e2e__/dispatch.spec.ts` at the conflict and invalid-filter scenarios. Verify that the fixed date exercises the conflict and that the original date survives it.
+* Review `src/features/dispatch/dispatch-screen.tsx` at the Visits section. Verify that the named region stays keyboard-focusable and contains the named table.
+* Human review is pending. The separate Sprint 1 signoff still needs its joint demo and visual critique evidence.
 2026-11-27, Windows 11, Node 24.21.0:
 * Unit, `npx vitest run src/features/maintenance src/features/dispatch`: **Passed**, 28 tests (planner-view 12, dispatch-view 16).
 * `node scripts/harness.mjs check`: **Passed** (19 changed paths in scope).
