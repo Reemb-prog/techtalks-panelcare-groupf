@@ -1,0 +1,250 @@
+"use client";
+
+/**
+ * Small UI pieces shared by the maintenance planner and dispatch board (PC-S1-07).
+ * Styling follows the PC-S1-05 dashboard: Tailwind utilities mapped to the --pc-* tokens.
+ */
+import Link from "next/link";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useAdapters } from "@/components/layout/adapters-provider";
+import { roleHome } from "@/components/layout/nav-items";
+import type { Tone } from "@/features/dashboard/dashboard-view";
+import type { ApiErrorBody, ApiResult } from "@/types";
+
+export const buttonPrimary =
+  "inline-flex min-h-[var(--pc-control-min-height)] items-center justify-center rounded-pc-control bg-pc-primary px-4 font-semibold text-pc-on-primary hover:bg-pc-primary-hover disabled:cursor-not-allowed disabled:bg-pc-disabled disabled:text-pc-muted";
+export const buttonSecondary =
+  "inline-flex min-h-[var(--pc-control-min-height)] items-center justify-center rounded-pc-control border border-pc-control-border bg-pc-surface px-4 font-semibold text-pc-text hover:bg-pc-canvas disabled:cursor-not-allowed disabled:text-pc-muted";
+export const buttonDanger =
+  "inline-flex min-h-[var(--pc-control-min-height)] items-center justify-center rounded-pc-control bg-pc-danger-text px-4 font-semibold text-pc-on-primary hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60";
+export const linkClass = "font-semibold text-pc-primary underline underline-offset-2";
+export const inputClass =
+  "block min-h-[var(--pc-control-min-height)] w-full rounded-pc-control border border-pc-control-border bg-pc-surface px-3 text-pc-text aria-[invalid=true]:border-pc-danger-text";
+export const labelClass = "block text-[length:var(--pc-type-control)] leading-[var(--pc-line-control)] font-semibold";
+export const captionClass = "text-[length:var(--pc-type-caption)] leading-[var(--pc-line-caption)] text-pc-muted";
+
+const TONE_CLASS: Record<Tone, string> = {
+  neutral: "bg-pc-neutral-bg text-pc-neutral-text",
+  info: "bg-pc-info-bg text-pc-info-text",
+  warning: "bg-pc-warning-bg text-pc-warning-text",
+  success: "bg-pc-success-bg text-pc-success-text",
+  danger: "bg-pc-danger-bg text-pc-danger-text",
+};
+
+export function Chip({ tone, children }: { tone: Tone; children: ReactNode }) {
+  return (
+    <span className={`inline-flex rounded-pc-pill px-2 text-[length:var(--pc-type-caption)] leading-[var(--pc-line-caption)] font-semibold whitespace-nowrap ${TONE_CLASS[tone]}`}>
+      {children}
+    </span>
+  );
+}
+
+export function PageHeader({ eyebrow, title, subtitle, actions }: { eyebrow: string; title: string; subtitle?: ReactNode; actions?: ReactNode }) {
+  return (
+    <div className="flex flex-wrap items-end justify-between gap-4">
+      <div className="min-w-0">
+        <p className="text-[length:var(--pc-type-control)] font-semibold text-pc-primary">{eyebrow}</p>
+        <h1 className="text-[length:var(--pc-type-page)] leading-[var(--pc-line-page)] font-bold break-words">{title}</h1>
+        {subtitle && <p className="mt-1 text-pc-muted">{subtitle}</p>}
+      </div>
+      {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
+    </div>
+  );
+}
+
+/** Bordered white section with an optional heading row. */
+export function Section({ title, id, actions, children }: { title: string; id: string; actions?: ReactNode; children: ReactNode }) {
+  return (
+    <section aria-labelledby={id} className="rounded-pc-panel border border-pc-border bg-pc-surface shadow-pc-card">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-pc-border px-4 py-3 sm:px-6">
+        <h2 id={id} className="text-[length:var(--pc-type-card)] font-semibold">
+          {title}
+        </h2>
+        {actions}
+      </div>
+      <div className="px-4 py-4 sm:px-6">{children}</div>
+    </section>
+  );
+}
+
+/** Tinted message box. role="alert" for errors that just happened; otherwise a labelled region. */
+export function Panel({ tone, title, role, children }: { tone: Tone; title: string; role?: "alert" | "status"; children?: ReactNode }) {
+  return (
+    <section role={role ?? "region"} aria-label={title} className={`rounded-pc-panel border border-pc-border p-4 sm:p-6 ${TONE_CLASS[tone]}`}>
+      <h2 className="text-[length:var(--pc-type-card)] font-semibold">{title}</h2>
+      {children && <div className="mt-1 flex flex-col gap-2">{children}</div>}
+    </section>
+  );
+}
+
+/** Acceptance: the demo warns scheduling is simulated until the S2 scheduler is linked. */
+export function SimulatedNotice() {
+  return (
+    <aside aria-label="Simulated scheduling" className="rounded-pc-panel border border-pc-border bg-pc-info-bg px-4 py-3 text-pc-info-text sm:px-6">
+      <p className="text-[length:var(--pc-type-control)] leading-[var(--pc-line-control)]">
+        <strong>Scheduling is simulated.</strong> Plans, visit dates and assignments live in this browser tab only and are generated by a
+        stand-in until the real scheduler is linked in Sprint 2. Nothing is saved.
+      </p>
+    </aside>
+  );
+}
+
+export type LoadState<T> = { kind: "loading" } | { kind: "ready"; data: T } | { kind: "failed"; status: number; error: ApiErrorBody };
+
+/**
+ * Loads data through a memoized adapter call and re-runs when the mock scenario changes.
+ * `reload({ quiet: true })` refreshes without blanking the screen (used after a successful action).
+ */
+export function useLoad<T>(load: () => Promise<ApiResult<T>>): { state: LoadState<T>; reload: (options?: { quiet?: boolean }) => void } {
+  const { dataVersion } = useAdapters();
+  const [state, setState] = useState<LoadState<T>>({ kind: "loading" });
+  const [attempt, setAttempt] = useState(0);
+  const quiet = useRef(false);
+
+  useEffect(() => {
+    let active = true;
+    if (!quiet.current) setState({ kind: "loading" });
+    quiet.current = false;
+    load()
+      .then((result) => {
+        if (active) setState(result.ok ? { kind: "ready", data: result.data } : { kind: "failed", status: result.status, error: result.error });
+      })
+      .catch(() => {
+        if (active) setState({ kind: "failed", status: 500, error: { code: "INTERNAL", message: "The mock request failed. Please try again." } });
+      });
+    return () => {
+      active = false;
+    };
+  }, [load, dataVersion, attempt]);
+
+  const reload = useCallback((options?: { quiet?: boolean }) => {
+    quiet.current = options?.quiet ?? false;
+    setAttempt((value) => value + 1);
+  }, []);
+  return { state, reload };
+}
+
+export function LoadingBlock({ label }: { label: string }) {
+  return (
+    <div aria-busy="true" className="flex flex-col gap-3">
+      <p role="status" className="sr-only">
+        {label}
+      </p>
+      <div aria-hidden="true" className="h-12 animate-pulse rounded-pc-card border border-pc-border bg-pc-surface" />
+      <div aria-hidden="true" className="h-56 animate-pulse rounded-pc-panel border border-pc-border bg-pc-surface" />
+    </div>
+  );
+}
+
+/** Failed load: signed out → back to sign-in; denied, not found and server errors each get their own panel. */
+export function LoadFailed({ status, error, what, onRetry, backHref, backLabel }: {
+  status: number;
+  error: ApiErrorBody;
+  what: string;
+  onRetry: () => void;
+  backHref: string;
+  backLabel: string;
+}) {
+  const { signOut } = useAdapters();
+  const signedOut = error.code === "UNAUTHENTICATED";
+  useEffect(() => {
+    if (signedOut) signOut();
+  }, [signedOut, signOut]);
+
+  if (signedOut) return <LoadingBlock label="Your demo session ended. Redirecting to sign in…" />;
+  if (status === 403) {
+    return (
+      <Panel tone="neutral" title="You don't have access to this page">
+        <p>{error.message} In this demo, pick &quot;Normal data&quot; in the mock banner to restore access.</p>
+      </Panel>
+    );
+  }
+  if (status === 404) {
+    return (
+      <Panel tone="neutral" title={`${what} not found`}>
+        <p>It may have been removed, or the link is wrong.</p>
+        <Link href={backHref} className={linkClass}>
+          {backLabel}
+        </Link>
+      </Panel>
+    );
+  }
+  return (
+    <Panel tone="danger" title={`The ${what.toLowerCase()} could not load`} role="alert">
+      <p>{error.message}</p>
+      <button type="button" onClick={onRetry} className={`${buttonSecondary} w-fit`}>
+        Try again
+      </button>
+    </Panel>
+  );
+}
+
+/** Coordinator-only screens: a technician gets a clear way back to their own work (UI cue only, not security). */
+export function CoordinatorOnly({ children }: { children: ReactNode }) {
+  const { auth } = useAdapters();
+  if (auth.status !== "signed-in") return null;
+  if (auth.session.role !== "coordinator") {
+    return (
+      <div className="mx-auto flex max-w-6xl flex-col gap-6">
+        <Panel tone="neutral" title="You don't have access to this page">
+          <p>Maintenance planning and dispatch are for coordinators. Your assigned visits are in My jobs.</p>
+          <Link href={roleHome("technician")} className={linkClass}>
+            Go to My jobs
+          </Link>
+        </Panel>
+      </div>
+    );
+  }
+  return <>{children}</>;
+}
+
+/**
+ * Native modal dialog: focus moves in, Escape closes, focus returns to the opener.
+ * Rendered only while open so its form state resets each time.
+ */
+export function Dialog({ title, onClose, children, wide = false }: { title: string; onClose: () => void; children: ReactNode; wide?: boolean }) {
+  const ref = useRef<HTMLDialogElement>(null);
+  const opener = useRef<Element | null>(null);
+  useEffect(() => {
+    opener.current = document.activeElement;
+    const dialog = ref.current;
+    if (dialog && !dialog.open) dialog.showModal();
+    return () => {
+      if (opener.current instanceof HTMLElement) opener.current.focus();
+    };
+  }, []);
+  return (
+    <dialog
+      ref={ref}
+      aria-labelledby="dialog-title"
+      onClose={onClose}
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose();
+      }}
+      className={`m-auto w-[calc(100%-2rem)] ${wide ? "max-w-2xl" : "max-w-lg"} rounded-pc-panel bg-pc-surface p-0 text-pc-text shadow-pc-overlay`}
+    >
+      <div className="flex items-start justify-between gap-3 border-b border-pc-border px-4 py-3 sm:px-6">
+        <h2 id="dialog-title" className="text-[length:var(--pc-type-section)] leading-[var(--pc-line-section)] font-bold">
+          {title}
+        </h2>
+        <button type="button" onClick={onClose} className="inline-flex min-h-[var(--pc-control-min-height)] min-w-[var(--pc-control-min-height)] items-center justify-center rounded-pc-control border border-pc-border">
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <path d="M6 6l12 12M18 6L6 18" />
+          </svg>
+          <span className="sr-only">Close</span>
+        </button>
+      </div>
+      <div className="flex flex-col gap-4 px-4 py-4 sm:px-6">{children}</div>
+    </dialog>
+  );
+}
+
+export function FieldError({ id, messages }: { id: string; messages?: string[] }) {
+  if (!messages?.length) return null;
+  return (
+    <p id={id} className="mt-1 text-[length:var(--pc-type-control)] text-pc-danger-text">
+      {messages.join(" ")}
+    </p>
+  );
+}
