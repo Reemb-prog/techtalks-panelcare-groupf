@@ -113,4 +113,4 @@ Developer to fill or decide:
 * Jira KAN-19: In Progress now; In Review once the PR is open.
 
 ## Handoff
-Status: Implemented; E2E blocked on browser download | Files changed: see `git status` (route files, features/maintenance, features/dispatch, two E2E specs, this worklog) | Next step: run E2E, then write pr.md and open the PR.
+Status: Implemented, pushed (3d77d71); PR text written in pr.md; E2E blocked (developer declined the ~150 MB browser download on 2026-11-27 because of a slow connection) | Files changed: route files, features/maintenance, features/dispatch, two E2E specs, this worklog, pr.md | Next step: run E2E when the connection allows (or a reviewer runs them), add screenshots, open the PR by D10 (2026-11-29).
