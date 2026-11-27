@@ -26,7 +26,7 @@ Branch base is `d058780`. Live Jira dependency states and approval remain unveri
 ## Implementation plan
 
 1. After plan approval, run the existing Playwright coverage for both projects and record results against the exact commit. Link dependency PR evidence and distinguish browser assertions from manual observations.
-2. Run the joint demo with Reem, Mahdi, Rand and Tarek. In the same mock tab, work through coordinator sign-in, registry, maintenance, dispatch and assignment. Switch to the mock technician role, work the assigned visit through inspection and confirmation, then inspect the report and note what a reload resets. Record attendees, outcome and any blocked steps.
+2. Collect independent walkthroughs from Reem, Mahdi, Rand and Tarek. Review coordinator sign-in, registry, maintenance, dispatch and assignment. Switch to the mock technician role, use a seeded visit for inspection and confirmation, then inspect the report and note what the role switch and reload reset. Record each reviewer, date, outcome and blocked steps.
 3. At 375, 768 and 1440 px, inspect both roles for scrolling, touch controls, keyboard focus, labels, Escape and contrast. Capture synthetic screenshots and run Impeccable. Record the tool version and distinguish source checks from rendered observations. Check empty, loading, error, invalid input and permission denial, including recovery and absence of misleading persisted success. Record gaps with severity and ownership. A blocking application defect needs a separate fix PR and a rerun on the merged baseline.
 4. Review [the contract](../../docs/CONTRACTS.md), DTOs, validation and adapter boundaries with the team. Record the exact reviewed revision and explicit API/DTO approval. Bring D06 customer confirmation wording to Reem and Tarek. If a decision changes the contract, record the impact and wait for the separately reviewed change before declaring the baseline frozen.
 5. Record S2 handoff by owner and prerequisite using the [roadmap](../../docs/ROADMAP.md). Include schema and RLS, server auth and roles, registry, maintenance plans, recurrence, dispatch, inspection/reporting, and the real cross-role integration check. Keep each backend acceptance result pending until verified against real services.
@@ -34,10 +34,10 @@ Branch base is `d058780`. Live Jira dependency states and approval remain unveri
 
 ## Acceptance
 
-- [ ] Run the joint coordinator and technician mock demo with all four members.
+- [ ] Collect individual coordinator and technician walkthrough outcomes from Reem, Mahdi, Rand and Tarek. Reem approved these in place of the joint demo on November 27.
 - [ ] Record Impeccable critique, screenshots, and responsive and accessibility gaps.
 - [ ] Verify empty, loading, error, invalid-input and permission-denied states and transient mock behavior.
-- [ ] Record explicit API/DTO approval and S2 handoff.
+- [x] Record explicit API/DTO approval and S2 handoff. Reem approved baseline `d058780` in chat on November 27.
 - [ ] Obtain non-author review, merge, and verify integration on main.
 
 ## Tests and evidence
@@ -55,15 +55,17 @@ Test exemption: documentation-only scope. Run existing unit and contract suites 
 | Same-tab role handoff | Failed to carry a new coordinator assignment into technician My Jobs. The technician's seeded jobs remained available. |
 | Responsive screenshot and overflow checks | Passed at 375, 768 and 1440 px for dispatch and technician jobs. Touch discoverability of offscreen dispatch actions remains a review point. |
 | Impeccable 4.10.0 source and rendered login scans | Passed. Source scan reported no findings across 75 files. Rendered login reported no anti-patterns and one advisory. |
-| Joint four-person demo and authenticated rendered detector scans | Not run |
-| API/DTO approval, D06 decision and Jira readiness | Blocked pending human review or access |
+| Individual walkthroughs and authenticated rendered detector scans | Not run |
+| API/DTO approval | Passed. Reem approved baseline `d058780` in chat on November 27. |
+| D06 decision | Reem approved the proposal in chat on November 27. Tarek concurrence pending. |
+| Jira readiness | Not independently verified |
 
 ## Developer review guide
 
 - Review the reproduced role-switch reset and the seeded-visit route in `docs/design/s1-signoff.md`. Decide whether the seeded visit is sufficient for the S1 demo.
 - Review the API/DTO and D06 approval steps and confirm who will sign the decision.
-- Link the Jira record for Rand's live plan approval. Reem, Mahdi, Rand and Tarek must attend the mock demo and record the actual outcome. Confirm whether the seeded-visit fallback is acceptable for S1 and record the separate API/DTO and D06 decisions.
+- Link the Jira record for Rand's live plan approval and the approved individual-review format. Collect the actual walkthrough results and Tarek's D06 concurrence.
 
 ## Handoff
 
-Draft signoff evidence is in `docs/design/s1-signoff.md`. The same-tab role-switch check found that a newly assigned visit is absent from technician My Jobs. Keep that limitation explicit during the demo. Final approval and the PR remain pending.
+Draft signoff evidence is in `docs/design/s1-signoff.md`. The same-tab role-switch check found that a newly assigned visit is absent from technician My Jobs. Disclose that limitation during each walkthrough. Individual outcomes, Tarek's D06 concurrence and the PR remain pending.

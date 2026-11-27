@@ -1,17 +1,19 @@
 ﻿# Sprint 1 frontend UX signoff
 
-**Status: pending human signoff.** This record covers the mock frontend from main at `d058780`. Rand Al Yaman approved the PC-S1-09 plan live on November 27, 2026, as reported by Reem. The demo, API/DTO acceptance and D06 disposition are separate decisions. A Jira approval entry was not independently verified.
+**Status: individual walkthroughs pending.** This record covers the mock frontend from main at `d058780`. Rand Al Yaman approved the PC-S1-09 plan live on November 27, 2026, as reported by Reem. Reem approved the API/DTO baseline and the individual-review format in chat on November 27. A Jira approval entry was not independently verified.
 
 Merged GitHub evidence includes the [coordinator shell](https://github.com/Reemb-prog/techtalks-panelcare-groupf/pull/18), [registry](https://github.com/Reemb-prog/techtalks-panelcare-groupf/pull/20), [planner and dispatch](https://github.com/Reemb-prog/techtalks-panelcare-groupf/pull/23), [technician flow](https://github.com/Reemb-prog/techtalks-panelcare-groupf/pull/22) and [dispatch follow-up](https://github.com/Reemb-prog/techtalks-panelcare-groupf/pull/24). The GitHub review lookup did not show an approved review for those PRs. Attach any separate review evidence during signoff.
 
-## Joint coordinator and technician demo
+## Individual coordinator and technician walkthrough
 
-Expected attendees are Reem, Mahdi, Rand and Tarek. Attendance, date and outcome are pending. The automated browser evidence below was collected before the team demo.
+Reem approved individual walkthroughs in place of the joint demo on November 27. Reem, Mahdi, Rand and Tarek each use the same walkthrough and record their own result. The automated browser evidence below was collected before those reviews.
 
 1. In the coordinator role, review the registry, maintenance plan, dispatch filters and assignment. Use synthetic fixture data throughout.
 2. In the technician role, open Omar Saleh's seeded November 30 visit, complete the checklist, review selected photo evidence, enter mock customer confirmation and open the service report.
 3. State the limitation before switching roles. A coordinator assigned the December 31 visit to Omar and saw the mock success message. After signing out and signing in as Omar in the same tab, the new assignment was absent from My Jobs. The coordinator and technician route layouts create separate in-memory adapter instances. Use the seeded visit for the technician portion. If the team requires the newly assigned visit to carry through the mock role switch, track that as a separate implementation fix and rerun the demo.
 4. Observe empty, loading, error, invalid-input and denied responses. Verify failed writes preserve appropriate form data and avoid success feedback. The mock session may be restored from session storage while business records are reseeded when the adapter remounts.
+
+For each individual review, record the reviewer, date, coordinator outcome, technician outcome, and any gap or blocker. Individual results are pending.
 
 ## Responsive and accessibility observations
 
@@ -36,7 +38,7 @@ The desktop technician report case passed on an isolated rerun with the same fiv
 
 ## API/DTO approval and S2 handoff
 
-Proposed baseline is [CONTRACTS.md](../CONTRACTS.md), `src/types/`, validation schemas and adapter interfaces at `d058780`. Human approval of that revision is pending. Preserve camelCase JSON, date formats, structured errors including field errors, and server-derived identity and authorization. S1 role checks and mutations run through typed mocks. D06 remains proposed in the [decisions log](../DECISIONS.md). Record the team's explicit decision before marking the baseline approved.
+Reem approved [CONTRACTS.md](../CONTRACTS.md), `src/types/`, validation schemas and adapter interfaces at `d058780` as the S2 API/DTO baseline on November 27. Preserve camelCase JSON, date formats, structured errors including field errors, and server-derived identity and authorization. S1 role checks and mutations run through typed mocks. Reem approved the D06 proposal as written. Tarek's concurrence remains pending in the [decisions log](../DECISIONS.md).
 
 | S2 item | Owner | Handoff |
 | --- | --- | --- |
