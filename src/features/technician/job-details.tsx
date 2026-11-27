@@ -10,6 +10,8 @@ import { JobInspection } from "./job-inspection";
 import { JobQuery } from "./job-query";
 import { useInspectionSubmission } from "./use-inspection-submission";
 
+const LEAVE_MESSAGE = "Leave this job? Your unsent changes will be lost.";
+
 export function JobDetails({ jobId }: { jobId: string }) {
   const { adapters: { dispatch } } = useAdapters();
   const [draft, setDraft] = useState<InspectionDraft>({
@@ -20,6 +22,7 @@ export function JobDetails({ jobId }: { jobId: string }) {
   const [starting, setStarting] = useState(false);
   const [startError, setStartError] = useState<{ message: string; reload: boolean }>();
   const startingRef = useRef(false);
+  const backGuard = useRef(false);
   const hasChanges = submission.state.status !== "success"
     && (Object.values(draft.answers).some(Boolean) || Boolean(draft.notes) || draft.photos.length > 0
       || Boolean(draft.customerName) || draft.acknowledged);
@@ -30,8 +33,26 @@ export function JobDetails({ jobId }: { jobId: string }) {
       event.preventDefault();
       event.returnValue = "";
     };
+    // Browser Back or a back swipe first lands on this duplicate entry, so leaving can be confirmed.
+    if (!backGuard.current) {
+      history.pushState(history.state, "", location.href);
+      backGuard.current = true;
+    }
+    const confirmBack = () => {
+      if (window.confirm(LEAVE_MESSAGE)) {
+        backGuard.current = false;
+        window.removeEventListener("popstate", confirmBack);
+        history.back();
+      } else {
+        history.pushState(history.state, "", location.href);
+      }
+    };
     window.addEventListener("beforeunload", warn);
-    return () => window.removeEventListener("beforeunload", warn);
+    window.addEventListener("popstate", confirmBack);
+    return () => {
+      window.removeEventListener("beforeunload", warn);
+      window.removeEventListener("popstate", confirmBack);
+    };
   }, [hasChanges]);
 
   const reloadJob = useCallback(() => {
@@ -70,7 +91,7 @@ export function JobDetails({ jobId }: { jobId: string }) {
           className="inline-flex min-h-[var(--pc-control-min-height)] items-center rounded-pc-control font-semibold text-pc-primary underline"
           href="/technician"
           onNavigate={(event) => {
-            if (hasChanges && !window.confirm("Leave this job? Your unsent changes will be lost.")) event.preventDefault();
+            if (hasChanges && !window.confirm(LEAVE_MESSAGE)) event.preventDefault();
           }}
         >
           Back to My Jobs

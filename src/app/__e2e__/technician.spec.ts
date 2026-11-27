@@ -195,6 +195,22 @@ test("starts a job and validates readings before opening photos and notes", asyn
   await expect(page.getByText("Uploaded", { exact: true })).toHaveCount(0);
 });
 
+test("asks before browser Back discards an unsent inspection", async ({ page }) => {
+  await signIn(page);
+  await page.goto(`/technician/jobs/${fixtureId("job", 7)}`);
+  const voltage = page.getByLabel(/String DC voltage \(V\)/);
+  await voltage.fill("12");
+  const dialogs: string[] = [];
+  page.once("dialog", (dialog) => { dialogs.push(dialog.message()); void dialog.dismiss(); });
+  await page.goBack();
+  await expect.poll(() => dialogs.length).toBe(1);
+  await expect(voltage).toHaveValue("12");
+  page.once("dialog", (dialog) => void dialog.accept());
+  await page.goBack();
+  await expect(page).toHaveURL(/\/technician$/);
+  expect(dialogs[0]).toContain("Leave this job?");
+});
+
 test("offers a retry when the mock Start Job action fails", async ({ page }) => {
   await page.clock.install({ time: new Date("2026-11-26T12:00:00Z") });
   await signIn(page);

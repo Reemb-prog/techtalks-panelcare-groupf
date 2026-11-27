@@ -48,10 +48,11 @@ export function useInspectionSubmission(jobId: string) {
       } else if (outcome.phase === "unknown-photo") {
         setState({
           status: "error",
-          message: "Could not verify that the photo details were added. Return to My Jobs and check the job before continuing.",
+          // Safe to retry: the report lists only the photo IDs in the final request, so a re-added photo cannot appear twice.
+          message: "Could not verify that the photo details were added. Retry to continue.",
           photoId: outcome.selectionId,
           photoStatusUnknown: true,
-          action: "none",
+          action: "retry",
         });
       } else if (outcome.phase === "completion" && outcome.result.ok) {
         setState({ status: "success", report: outcome.result.data });
