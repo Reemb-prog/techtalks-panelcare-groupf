@@ -51,5 +51,10 @@ describe("PanelCare design tokens", () => {
   it.each(["canvas", "surface"])("keeps control boundaries and focus visible on %s", (surface) => {
     expect(contrast("color-control-border", `color-${surface}`)).toBeGreaterThanOrEqual(3);
     expect(contrast("color-focus", `color-${surface}`)).toBeGreaterThanOrEqual(3);
+    expect(contrast("color-text-muted", `color-${surface}`)).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it("keeps the sign-in panel's supporting copy readable", () => {
+    expect(contrast("color-accent", "color-text")).toBeGreaterThanOrEqual(4.5);
   });
 });

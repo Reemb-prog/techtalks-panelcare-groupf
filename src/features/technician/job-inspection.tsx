@@ -54,6 +54,7 @@ export function JobInspection({ jobId, draft, setDraft, submission, onReload }: 
     <JobQuery
       load={load}
       loadingMessage="Loading inspection checklist…"
+      loadingLayout="form"
       errorMessage="Unable to load the inspection checklist."
       deniedMessage="You don't have permission to view the inspection checklist."
     >

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ContentSkeleton } from "@/components/layout/loading-skeleton";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useAdapters } from "@/components/layout/adapters-provider";
@@ -39,7 +40,7 @@ function Action({ href, children, primary = false }: { href: string; children: R
 function Screen({ title, subtitle, action, children }: { title: string; subtitle?: string; action?: ReactNode; children: ReactNode }) {
   return <div className={css.screen}>
     <header className={css.top}>
-      <div><p className={css.eyebrow}>Registry · Mock data</p><h1>{title}</h1>{subtitle && <p className={css.muted}>{subtitle}</p>}</div>
+      <div><h1>{title}</h1>{subtitle && <p className={css.muted}>{subtitle}</p>}</div>
       {action}
     </header>
     {children}
@@ -50,7 +51,7 @@ function Card({ href, title, children }: { href: string; title: string; children
   return <Link className={css.card} href={href}><h2>{title}</h2>{children}</Link>;
 }
 
-function Query<T>({ load, children }: { load: () => Promise<ApiResult<T>>; children: (data: T) => ReactNode }) {
+function Query<T>({ load, layout = "detail", children }: { load: () => Promise<ApiResult<T>>; layout?: "cards" | "detail"; children: (data: T) => ReactNode }) {
   const { dataVersion } = useAdapters();
   const [retry, setRetry] = useState(0);
   const [response, setResponse] = useState<{ load: typeof load; version: number; retry: number; result: ApiResult<T> } | null>(null);
@@ -64,7 +65,7 @@ function Query<T>({ load, children }: { load: () => Promise<ApiResult<T>>; child
   }, [load, dataVersion, retry]);
 
   if (response?.load !== load || response.version !== dataVersion || response.retry !== retry) {
-    return <section className={css.panel} role="status" aria-busy="true">Loading registry records…</section>;
+    return <ContentSkeleton label="Loading registry records…" layout={layout} />;
   }
   const { result } = response;
   if (result.ok) return children(result.data);
@@ -112,10 +113,10 @@ function ListScreen({ area }: { area: Area }) {
       <div><label htmlFor="registry-search">Search {area}</label><input id="registry-search" value={input} onChange={(event) => setInput(event.target.value)} /></div>
       <button className={css.primary}>Search</button>
     </form>
-    {area === "customers" ? <Query load={customers}>{data => <Results data={data} page={page} setPage={setPage} query={query} clear={clear}
+    {area === "customers" ? <Query load={customers} layout="cards">{data => <Results data={data} page={page} setPage={setPage} query={query} clear={clear}
       render={record => <Card key={record.id} href={"/customers/" + record.id} title={record.displayName}>
         <p className={css.muted}>{record.contactEmail ?? "No email recorded"}</p><p>{record.siteCount} sites · {record.systemCount} systems</p>
-      </Card>} />}</Query> : <Query load={systems}>{data => <Results data={data} page={page} setPage={setPage} query={query} clear={clear}
+      </Card>} />}</Query> : <Query load={systems} layout="cards">{data => <Results data={data} page={page} setPage={setPage} query={query} clear={clear}
       render={record => <Card key={record.id} href={"/systems/" + record.id} title={record.label}>
         <p className={css.muted}>{record.customerName} · {record.siteLabel}</p><p>{record.capacityKw} kWp · {record.activeComponentCount} active components</p>
         <p>Next warranty expiry: {record.nextWarrantyExpiry ?? "Not recorded"}</p>

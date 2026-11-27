@@ -68,7 +68,6 @@ function DispatchBoard() {
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
       <PageHeader
-        eyebrow="Dispatch · Mock data"
         title="Dispatch board"
         subtitle="Assign technicians and keep visits on schedule."
         actions={
@@ -80,7 +79,7 @@ function DispatchBoard() {
       <SimulatedNotice />
 
       {/* 2. Filters */}
-      <section aria-labelledby="filters-heading" className="rounded-pc-panel border border-pc-border bg-pc-surface p-4 shadow-pc-card sm:p-6">
+      <section aria-labelledby="filters-heading" className="rounded-pc-panel border border-pc-border bg-pc-surface p-4 sm:p-6">
         <h2 id="filters-heading" className="sr-only">
           Filters
         </h2>
@@ -156,7 +155,7 @@ function DispatchBoard() {
       )}
 
       {state.kind === "loading" ? (
-        <LoadingBlock label="Loading visits" />
+        <LoadingBlock label="Loading visits" layout="rows" />
       ) : state.kind === "failed" ? (
         <LoadFailed status={state.status} error={state.error} what="Dispatch board" onRetry={() => reload()} backHref="/dashboard" backLabel="Back to dashboard" />
       ) : (
@@ -236,14 +235,14 @@ function BoardView({ board, filters, today, onOpen, onPage }: {
           </Link>
         </Panel>
       ) : (
-        <section className="rounded-pc-panel border border-pc-border bg-pc-surface shadow-pc-card">
+        <section className="rounded-pc-panel border border-pc-border bg-pc-surface">
           <h2 id="visits-heading" className="sr-only">
             Visits
           </h2>
           {/* relative: keeps the screen-reader-only "Actions" header inside the scroll box (it widened the page at 375 px). */}
           <div role="region" aria-labelledby="visits-heading" tabIndex={0} className="relative overflow-x-auto">
             <table aria-labelledby="visits-heading" className="w-full min-w-[40rem] text-left text-[length:var(--pc-type-control)] leading-[var(--pc-line-control)]">
-              <thead className="text-pc-muted">
+              <thead className="bg-pc-canvas text-pc-muted">
                 <tr>
                   <th scope="col" className="px-4 py-2 font-semibold sm:px-6">Date</th>
                   <th scope="col" className="px-4 py-2 font-semibold">Customer and site</th>
@@ -256,7 +255,7 @@ function BoardView({ board, filters, today, onOpen, onPage }: {
               </thead>
               <tbody>
                 {rows.map((row) => (
-                  <tr key={row.id} className="border-t border-pc-border">
+                  <tr key={row.id} className="border-t border-pc-border hover:bg-pc-canvas/65">
                     <td className="px-4 py-3 whitespace-nowrap sm:px-6">
                       <span className="font-semibold">
                         {formatShortDate(row.scheduledDate)} {row.scheduledDate.slice(0, 4)}

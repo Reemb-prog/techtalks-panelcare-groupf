@@ -68,6 +68,7 @@ test("shows loading, empty, error and denied job-list states", async ({ page }) 
 
   await mockData.selectOption("slow");
   await expect(main.getByRole("status")).toHaveText("Loading your jobs…");
+  await expect(main.getByTestId("loading-skeleton")).toBeVisible();
   await expect(jobs).toBeVisible();
   await mockData.selectOption("empty");
   await expect(main.getByRole("status")).toHaveText("You have no assigned jobs right now. New assignments will appear here.");
@@ -345,7 +346,8 @@ test("handles coordinator report loading, error, retry, denied and unavailable s
   await expect(results).toBeVisible();
   const mockData = page.getByLabel("Mock data");
   await mockData.selectOption("slow");
-  await expect(page.getByText("Loading service report…")).toBeVisible();
+  await expect(page.getByRole("status").filter({ hasText: "Loading service report…" })).toBeAttached();
+  await expect(page.getByTestId("loading-skeleton")).toBeVisible();
   await expect(results).toBeVisible();
   await mockData.selectOption("error");
   const main = page.locator("#main");

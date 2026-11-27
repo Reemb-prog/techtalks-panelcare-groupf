@@ -21,7 +21,7 @@ export function SidebarNav({ role, onNavigate }: { role: Role; onNavigate?: () =
                 onClick={onNavigate}
                 aria-current={active ? "page" : undefined}
                 className={
-                  "flex min-h-[var(--pc-control-min-height)] items-center gap-3 rounded-pc-control px-3 font-semibold " +
+                  "flex min-h-[var(--pc-control-min-height)] items-center gap-3 rounded-pc-control px-3 text-sm font-semibold " +
                   (active ? "bg-pc-accent text-pc-primary-hover" : "text-pc-muted hover:bg-pc-canvas hover:text-pc-text")
                 }
               >

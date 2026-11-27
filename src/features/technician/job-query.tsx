@@ -2,18 +2,20 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { useAdapters } from "@/components/layout/adapters-provider";
+import { ContentSkeleton } from "@/components/layout/loading-skeleton";
 import type { ApiResult } from "@/types";
 
 type JobQueryProps<T> = {
   load: () => Promise<ApiResult<T>>;
   loadingMessage: string;
+  loadingLayout?: "cards" | "detail" | "form";
   errorMessage: string;
   deniedMessage: string;
   unavailable?: { title: string; message: string };
   children: (data: T) => ReactNode;
 };
 
-export function JobQuery<T>({ load, loadingMessage, errorMessage, deniedMessage, unavailable, children }: JobQueryProps<T>) {
+export function JobQuery<T>({ load, loadingMessage, loadingLayout = "detail", errorMessage, deniedMessage, unavailable, children }: JobQueryProps<T>) {
   const { dataVersion } = useAdapters();
   const [attempt, setAttempt] = useState(0);
   const [response, setResponse] = useState<{
@@ -35,11 +37,7 @@ export function JobQuery<T>({ load, loadingMessage, errorMessage, deniedMessage,
   }, [load, dataVersion, attempt, errorMessage]);
 
   if (response?.load !== load || response.dataVersion !== dataVersion || response.attempt !== attempt) {
-    return (
-      <p role="status" className="rounded-pc-card border border-pc-border bg-pc-surface p-5 text-pc-muted">
-        {loadingMessage}
-      </p>
-    );
+    return <ContentSkeleton label={loadingMessage} layout={loadingLayout} />;
   }
 
   const { result } = response;

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
+import { LoadingSkeleton, skeletonFill } from "@/components/layout/loading-skeleton";
 import { useAdapters } from "@/components/layout/adapters-provider";
 import { roleHome } from "@/components/layout/nav-items";
 import { addDays, businessToday } from "@/lib/validations/dates";
@@ -105,10 +106,10 @@ function ReadyView({ data }: { data: DashboardData }) {
     <>
       {/* 2. Visit summary cards */}
       <section aria-labelledby="summary-heading">
-        <h2 id="summary-heading" className="sr-only">
+        <h2 id="summary-heading" className="mb-3 text-[length:var(--pc-type-card)] font-semibold">
           Visit summary
         </h2>
-        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        <ul className="grid grid-cols-2 gap-px overflow-hidden rounded-pc-card border border-pc-border bg-pc-border sm:grid-cols-3 lg:grid-cols-5">
           {data.cards.map((card) => (
             <SummaryCardView key={card.key} card={card} />
           ))}
@@ -136,12 +137,12 @@ function ReadyView({ data }: { data: DashboardData }) {
 
 function SummaryCardView({ card }: { card: SummaryCard }) {
   return (
-    <li className="rounded-pc-card border border-pc-border bg-pc-surface p-4 shadow-pc-card">
+    <li className="min-w-0 bg-pc-surface p-4 last:col-span-2 lg:last:col-span-1">
       <p className="flex items-center gap-2 text-[length:var(--pc-type-control)] font-semibold text-pc-muted">
         <span aria-hidden="true" className={`size-2 shrink-0 rounded-pc-pill ${DOT_CLASS[card.tone]}`} />
         {card.label}
       </p>
-      <p className="mt-1 text-[length:var(--pc-type-display)] leading-[var(--pc-line-display)] font-bold tabular-nums">{card.value}</p>
+      <p className="mt-1 text-[length:var(--pc-type-page)] leading-[var(--pc-line-page)] font-bold tracking-tight tabular-nums">{card.value}</p>
       <p className="text-[length:var(--pc-type-caption)] leading-[var(--pc-line-caption)] text-pc-muted">{card.hint}</p>
     </li>
   );
@@ -149,7 +150,7 @@ function SummaryCardView({ card }: { card: SummaryCard }) {
 
 function JobsSection({ jobs, total, today }: { jobs: JobRow[]; total: number; today: string }) {
   return (
-    <section aria-labelledby="jobs-heading" className="rounded-pc-panel border border-pc-border bg-pc-surface shadow-pc-card">
+    <section aria-labelledby="jobs-heading" className="rounded-pc-panel border border-pc-border bg-pc-surface">
       <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-pc-border px-4 py-3 sm:px-6">
         <h2 id="jobs-heading" className="text-[length:var(--pc-type-card)] font-semibold">
           Upcoming and overdue visits
@@ -163,7 +164,7 @@ function JobsSection({ jobs, total, today }: { jobs: JobRow[]; total: number; to
       ) : (
         <div role="region" aria-labelledby="jobs-heading" tabIndex={0} className="overflow-x-auto">
           <table className="w-full min-w-[30rem] text-left sm:min-w-[36rem] text-[length:var(--pc-type-control)] leading-[var(--pc-line-control)]">
-            <thead className="text-pc-muted">
+            <thead className="bg-pc-canvas text-pc-muted">
               <tr>
                 <th scope="col" className="px-4 py-2 font-semibold sm:px-6">Date</th>
                 <th scope="col" className="px-4 py-2 font-semibold">Customer and site</th>
@@ -173,7 +174,7 @@ function JobsSection({ jobs, total, today }: { jobs: JobRow[]; total: number; to
             </thead>
             <tbody>
               {jobs.map((job) => (
-                <tr key={job.id} className="border-t border-pc-border">
+                <tr key={job.id} className="border-t border-pc-border hover:bg-pc-canvas/65">
                   <td className="px-4 py-3 whitespace-nowrap sm:px-6">
                     <span className="font-semibold">{formatShortDate(job.scheduledDate)}</span>
                     <span className={`block text-[length:var(--pc-type-caption)] ${job.overdue ? "font-semibold text-pc-danger-text" : "text-pc-muted"}`}>
@@ -207,7 +208,7 @@ function JobsSection({ jobs, total, today }: { jobs: JobRow[]; total: number; to
 function WarrantiesSection({ warranties, today }: { warranties: ExpiringWarranty[]; today: string }) {
   const shown = warranties.slice(0, 5);
   return (
-    <section aria-labelledby="warranties-heading" className="rounded-pc-panel border border-pc-border bg-pc-surface shadow-pc-card">
+    <section aria-labelledby="warranties-heading" className="rounded-pc-panel border border-pc-border bg-pc-surface">
       <div className="border-b border-pc-border px-4 py-3 sm:px-6">
         <h2 id="warranties-heading" className="text-[length:var(--pc-type-card)] font-semibold">
           Expiring warranties
@@ -257,17 +258,29 @@ function Chip({ tone, children }: { tone: Tone; children: ReactNode }) {
 
 function LoadingView() {
   return (
-    <div aria-busy="true" className="flex flex-col gap-6">
-      <p role="status" className="sr-only">
-        Loading dashboard
-      </p>
-      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5" aria-hidden="true">
-        {Array.from({ length: 5 }, (_, index) => (
-          <li key={index} className="h-[7.5rem] animate-pulse rounded-pc-card border border-pc-border bg-pc-surface" />
-        ))}
-      </ul>
-      <div aria-hidden="true" className="h-64 animate-pulse rounded-pc-panel border border-pc-border bg-pc-surface" />
-    </div>
+    <LoadingSkeleton label="Loading dashboard">
+      <div className="space-y-6">
+        <div>
+          <div className={`${skeletonFill} mb-3 h-7 w-28`} />
+          <div className="grid grid-cols-2 gap-px overflow-hidden rounded-pc-card border border-pc-border bg-pc-border sm:grid-cols-3 lg:grid-cols-5">
+            {[0, 1, 2, 3, 4].map((card) => (
+              <div key={card} className="min-h-28 space-y-3 bg-pc-surface p-4 last:col-span-2 lg:last:col-span-1">
+                <div className={`${skeletonFill} h-3 w-3/4 max-w-32`} />
+                <div className={`${skeletonFill} h-8 w-12`} />
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+          {[0, 1].map((panel) => (
+            <div key={panel} className="space-y-5 rounded-pc-panel border border-pc-border bg-pc-surface p-5">
+              <div className={`${skeletonFill} h-5 w-1/3`} />
+              {[0, 1, 2, 3].map((row) => <div key={row} className={`${skeletonFill} h-4 w-3/4`} />)}
+            </div>
+          ))}
+        </div>
+      </div>
+    </LoadingSkeleton>
   );
 }
 

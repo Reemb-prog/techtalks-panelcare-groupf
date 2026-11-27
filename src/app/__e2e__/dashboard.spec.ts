@@ -80,6 +80,9 @@ test("empty, error and denied mock scenarios", async ({ page }) => {
   await signInAs(page, "coordinator");
   const scenario = page.getByLabel("Mock data");
 
+  await scenario.selectOption("slow");
+  await expect(page.getByTestId("loading-skeleton")).toBeVisible();
+  await expect(page.getByTestId("loading-skeleton")).toHaveCount(0);
   await scenario.selectOption({ label: "No records" });
   await expect(page.getByRole("region", { name: "No maintenance activity yet" })).toBeVisible();
   await expect(page.getByText("No warranties expire in the next 90 days.")).toBeVisible();

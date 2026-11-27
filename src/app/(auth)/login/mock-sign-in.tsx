@@ -42,8 +42,8 @@ export function MockSignIn() {
   const checking = auth.status === "loading";
 
   return (
-    <div className="grid min-h-screen lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)]">
-      <main className="flex flex-col justify-between gap-8 px-4 py-8 sm:px-8 lg:px-16 lg:py-12">
+    <div className="grid min-h-screen bg-pc-surface lg:grid-cols-[minmax(0,6fr)_minmax(0,5fr)]">
+      <main className="flex flex-col justify-between gap-10 px-5 py-7 sm:px-10 lg:px-14 lg:py-10">
         <header className="flex items-center gap-3">
           <BrandMark />
           <span className="text-[length:var(--pc-type-card)] font-bold">{appName}</span>
@@ -51,21 +51,16 @@ export function MockSignIn() {
 
         <div className="mx-auto w-full max-w-md">
           {/* 1. Brand and promise */}
-          <h1 className="text-[length:var(--pc-type-page)] leading-[var(--pc-line-page)] font-bold">Sign in to {appName}</h1>
+          <h1 className="text-[length:var(--pc-type-page)] leading-[var(--pc-line-page)] font-bold lg:text-[length:var(--pc-type-display)] lg:leading-[var(--pc-line-display)]">Sign in to {appName}</h1>
           <p className="mt-2 text-pc-muted">Preventive solar maintenance, planned and dispatched in one place.</p>
 
           {/* 3. Safe demo notice (kept above the actions so it is read first) */}
           <div
             role="note"
             aria-label="Mock sign-in"
-            className="mt-6 rounded-pc-card border border-pc-warning-text/30 bg-pc-warning-bg px-4 py-3 text-pc-warning-text"
+            className="mt-6 rounded-pc-card border border-pc-warning-text/20 bg-pc-warning-bg px-4 py-3 text-pc-warning-text"
           >
-            <p className="font-semibold">
-              <span className="mr-2 inline-block rounded-pc-pill bg-pc-warning-text px-2 text-[length:var(--pc-type-caption)] leading-[var(--pc-line-caption)] font-bold tracking-wide text-pc-warning-bg uppercase">
-                Mock
-              </span>
-              Demo sign-in, not a real login
-            </p>
+            <p className="text-sm font-semibold">Demo sign-in, not a real login</p>
             <p className="mt-1 text-[length:var(--pc-type-control)] leading-[var(--pc-line-control)]">
               Pick a demo role to explore with sample data. There is no password, nothing is saved, and the choice lasts only
               for this browser tab.
@@ -73,11 +68,11 @@ export function MockSignIn() {
           </div>
 
           {/* 2. Role selection card */}
-          <section aria-labelledby="demo-roles" className="mt-6 rounded-pc-panel border border-pc-border bg-pc-surface p-4 shadow-pc-card sm:p-6">
+          <section aria-labelledby="demo-roles" className="mt-8">
             <h2 id="demo-roles" className="text-[length:var(--pc-type-card)] font-semibold">
               Choose a demo role
             </h2>
-            <ul className="mt-4 flex flex-col gap-3">
+            <ul className="mt-3 flex flex-col gap-4">
               {DEMO_ROLES.map(({ role, title, description }) => (
                 <li key={role}>
                   <button
@@ -112,18 +107,13 @@ export function MockSignIn() {
         </footer>
       </main>
 
-      {/* Desktop context panel. No photo until a rights-verified image is in assets/image-manifest.csv (D09). */}
-      <aside aria-hidden="true" className="relative hidden overflow-hidden bg-pc-text lg:block">
-        <div className="absolute inset-0 grid grid-cols-6 gap-2 p-10 opacity-40 [transform:perspective(900px)_rotateX(28deg)_scale(1.25)]">
-          {Array.from({ length: 48 }, (_, index) => (
-            <div key={index} className="rounded-sm border border-pc-accent/40 bg-pc-primary/50" />
-          ))}
-        </div>
-        <div className="absolute inset-x-10 bottom-12 text-pc-on-primary">
-          <p className="text-[length:var(--pc-type-section)] leading-[var(--pc-line-section)] font-semibold">
+      <aside aria-hidden="true" className="hidden items-center bg-pc-text px-12 text-pc-on-primary lg:flex xl:px-20">
+        <div className="max-w-md">
+          <BrandMark size={72} />
+          <p className="mt-8 max-w-[12ch] text-[length:var(--pc-type-display)] leading-[var(--pc-line-display)] font-semibold tracking-tight">
             Every system on schedule.
           </p>
-          <p className="mt-2 max-w-sm text-pc-accent">Upcoming visits, overdue work and expiring warranties at a glance.</p>
+          <p className="mt-4 max-w-xs text-pc-accent">Upcoming visits, overdue work and expiring warranties at a glance.</p>
         </div>
       </aside>
     </div>

@@ -69,8 +69,10 @@ test("shows slow, empty, error and denied mock results and recovers", async ({ p
   await page.goto("/customers");
   const scenario = page.getByLabel("Mock data");
   await scenario.selectOption("slow");
-  await expect(page.getByText("Loading registry records…")).toBeVisible();
+  await expect(page.getByRole("status").filter({ hasText: "Loading registry records…" })).toBeAttached();
+  await expect(page.getByTestId("loading-skeleton")).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Result pages" })).toBeVisible();
+  await expect(page.getByTestId("loading-skeleton")).toHaveCount(0);
   await scenario.selectOption("empty");
   await expect(page.getByRole("heading", { name: "No records yet" })).toBeVisible();
   await scenario.selectOption("error");

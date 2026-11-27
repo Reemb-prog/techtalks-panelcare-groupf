@@ -1,22 +1,22 @@
 :root {
-  --pc-color-canvas: #f2f6fd;
+  --pc-color-canvas: #f5f7fa;
   --pc-color-surface: #fff;
-  --pc-color-text: #112744;
-  --pc-color-text-muted: #455c78;
-  --pc-color-border: #c4d3e8;
-  --pc-color-control-border: #7389a4;
-  --pc-color-primary: #1757b8;
-  --pc-color-primary-hover: #12458f;
+  --pc-color-text: #16253a;
+  --pc-color-text-muted: #4e6075;
+  --pc-color-border: #d6dfe9;
+  --pc-color-control-border: #74869b;
+  --pc-color-primary: #194fa6;
+  --pc-color-primary-hover: #133f86;
   --pc-color-on-primary: #fff;
-  --pc-color-accent: #dfebff;
+  --pc-color-accent: #e8effb;
   --pc-color-focus: #2563eb;
   --pc-color-disabled: #e1e9f4;
 
   --pc-status-neutral-bg: #e1e9f4;
-  --pc-status-neutral-text: #455c78;
-  --pc-status-info-bg: #dfebff;
-  --pc-status-info-text: #12458f;
-  --pc-status-warning-bg: #f9d983;
+  --pc-status-neutral-text: #4e6075;
+  --pc-status-info-bg: #e8effb;
+  --pc-status-info-text: #133f86;
+  --pc-status-warning-bg: #fff3d6;
   --pc-status-warning-text: #573800;
   --pc-status-success-bg: #e0f4e8;
   --pc-status-success-text: #17563a;
@@ -57,6 +57,6 @@
   --pc-radius-pill: 999px;
   --pc-control-min-height: 2.75rem;
   --pc-focus-width: 2px;
-  --pc-shadow-card: 0 2px 8px rgb(17 39 68 / 8%);
+  --pc-shadow-card: 0 1px 2px rgb(22 37 58 / 4%);
   --pc-shadow-overlay: 0 8px 24px rgb(17 39 68 / 14%);
 }

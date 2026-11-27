@@ -61,6 +61,20 @@ body {
   outline-offset: 2px;
 }
 
+::selection {
+  color: var(--pc-color-primary-hover);
+  background: var(--pc-color-accent);
+}
+
+h1 {
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+table {
+  font-variant-numeric: tabular-nums;
+}
+
 dialog::backdrop {
   background: rgb(17 39 68 / 45%);
 }

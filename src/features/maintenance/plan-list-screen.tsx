@@ -43,7 +43,6 @@ function PlanList() {
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
       <PageHeader
-        eyebrow="Maintenance · Mock data"
         title="Maintenance plans"
         subtitle="Recurring service schedules for each solar system."
         actions={
@@ -98,7 +97,7 @@ function PlanList() {
       </form>
 
       {state.kind === "loading" ? (
-        <LoadingBlock label="Loading maintenance plans" />
+        <LoadingBlock label="Loading maintenance plans" layout="rows" />
       ) : state.kind === "failed" ? (
         <LoadFailed status={state.status} error={state.error} what="Plans" onRetry={() => reload()} backHref="/dashboard" backLabel="Back to dashboard" />
       ) : state.data.items.length === 0 ? (
@@ -118,13 +117,13 @@ function PlanList() {
           </Panel>
         )
       ) : (
-        <section aria-labelledby="plans-heading" className="rounded-pc-panel border border-pc-border bg-pc-surface shadow-pc-card">
+        <section aria-labelledby="plans-heading" className="rounded-pc-panel border border-pc-border bg-pc-surface">
           <h2 id="plans-heading" className="sr-only">
             Plans
           </h2>
           <div role="region" aria-labelledby="plans-heading" tabIndex={0} className="overflow-x-auto">
             <table className="w-full min-w-[36rem] text-left text-[length:var(--pc-type-control)] leading-[var(--pc-line-control)]">
-              <thead className="text-pc-muted">
+              <thead className="bg-pc-canvas text-pc-muted">
                 <tr>
                   <th scope="col" className="px-4 py-2 font-semibold sm:px-6">Customer and system</th>
                   <th scope="col" className="px-4 py-2 font-semibold">Schedule</th>
@@ -134,7 +133,7 @@ function PlanList() {
               </thead>
               <tbody>
                 {state.data.items.map((plan) => (
-                  <tr key={plan.id} className="border-t border-pc-border">
+                  <tr key={plan.id} className="border-t border-pc-border hover:bg-pc-canvas/65">
                     <td className="px-4 py-3 sm:px-6">
                       <Link href={`/maintenance/${plan.id}`} className={linkClass}>
                         {plan.customerName}

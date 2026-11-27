@@ -2,7 +2,7 @@ import type { ReportSnapshot } from "@/types";
 import { displayAnswer } from "./inspection-values";
 import { JobDate, JobStatusBadge } from "./job-summary";
 
-const panel = "min-w-0 space-y-3 rounded-pc-card border border-pc-border bg-pc-surface p-5 [overflow-wrap:anywhere] shadow-pc-card";
+const panel = "min-w-0 space-y-3 rounded-pc-card border border-pc-border bg-pc-surface p-5 [overflow-wrap:anywhere]";
 const localDateTime = new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Beirut" });
 
 export function ReportContent({ snapshot }: { snapshot: ReportSnapshot }) {
@@ -13,7 +13,7 @@ export function ReportContent({ snapshot }: { snapshot: ReportSnapshot }) {
         <section className={panel} aria-labelledby="report-job">
           <h2 id="report-job" className="text-lg font-semibold">Job details</h2>
           <JobStatusBadge status="completed" />
-          <dl className="grid gap-3 sm:grid-cols-2">
+          <dl className="grid gap-x-5 gap-y-3 border-t border-pc-border pt-4 sm:grid-cols-2">
             <div><dt className="text-sm text-pc-muted">Site</dt><dd className="break-words">{site.label}</dd></div>
             <div><dt className="text-sm text-pc-muted">Solar system</dt><dd className="break-words">{system.label}</dd></div>
             <div><dt className="text-sm text-pc-muted">Customer</dt><dd className="break-words">{customer.displayName}</dd></div>
@@ -26,7 +26,7 @@ export function ReportContent({ snapshot }: { snapshot: ReportSnapshot }) {
         <section className={panel} aria-labelledby="report-checklist">
           <h2 id="report-checklist" className="text-lg font-semibold">Inspection results</h2>
           <p className="text-sm text-pc-muted">{checklist.title}</p>
-          <dl className="grid gap-3 sm:grid-cols-2">
+          <dl className="grid gap-x-5 gap-y-3 border-t border-pc-border pt-4 sm:grid-cols-2">
             {checklist.lines.map((line) => (
               <div key={line.itemId} className="min-w-0">
                 <dt className="text-sm text-pc-muted">{line.label}</dt>
@@ -46,7 +46,7 @@ export function ReportContent({ snapshot }: { snapshot: ReportSnapshot }) {
           {photos.length ? (
             <ul className="space-y-3">
               {photos.map(({ id, caption }, index) => (
-                <li key={id} className="rounded-pc-control border border-pc-border p-3">
+                <li key={id} className="border-t border-pc-border pt-3">
                   <p className="font-semibold">Photo {index + 1}</p>
                   <p className="break-words">{caption || "No caption provided."}</p>
                   <p className="text-sm text-pc-muted">Image preview unavailable in this demo.</p>

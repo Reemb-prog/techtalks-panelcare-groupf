@@ -57,7 +57,6 @@ function NewPlan() {
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
       <PageHeader
-        eyebrow="Maintenance · Mock data"
         title="New maintenance plan"
         subtitle="Choose a system, how often it is serviced and the first visit date."
         actions={
@@ -68,7 +67,7 @@ function NewPlan() {
       />
       <SimulatedNotice />
       {state.kind === "loading" ? (
-        <LoadingBlock label="Loading solar systems" />
+        <LoadingBlock label="Loading solar systems" layout="form" />
       ) : state.kind === "failed" ? (
         <LoadFailed status={state.status} error={state.error} what="Systems" onRetry={() => reload()} backHref="/maintenance" backLabel="Back to plans" />
       ) : (
@@ -100,7 +99,6 @@ function EditPlan({ planId }: { planId: string }) {
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
       {state.kind === "ready" ? (
         <PageHeader
-          eyebrow="Maintenance · Mock data"
           title="Edit schedule"
           subtitle={`${state.data.system.customer.displayName} · ${state.data.system.site.label} · ${state.data.system.label}`}
           actions={
@@ -110,11 +108,11 @@ function EditPlan({ planId }: { planId: string }) {
           }
         />
       ) : (
-        <PageHeader eyebrow="Maintenance · Mock data" title="Edit schedule" />
+        <PageHeader title="Edit schedule" />
       )}
       <SimulatedNotice />
       {state.kind === "loading" ? (
-        <LoadingBlock label="Loading plan" />
+        <LoadingBlock label="Loading plan" layout="form" />
       ) : state.kind === "failed" ? (
         <LoadFailed status={state.status} error={state.error} what="Plan" onRetry={() => reload()} backHref="/maintenance" backLabel="Back to plans" />
       ) : (
@@ -147,7 +145,7 @@ function PlanDetail({ planId }: { planId: string }) {
   if (state.kind === "loading") {
     return (
       <div className="mx-auto flex max-w-6xl flex-col gap-6">
-        <PageHeader eyebrow="Maintenance · Mock data" title="Maintenance plan" />
+        <PageHeader title="Maintenance plan" />
         <LoadingBlock label="Loading plan" />
       </div>
     );
@@ -155,7 +153,7 @@ function PlanDetail({ planId }: { planId: string }) {
   if (state.kind === "failed") {
     return (
       <div className="mx-auto flex max-w-6xl flex-col gap-6">
-        <PageHeader eyebrow="Maintenance · Mock data" title="Maintenance plan" />
+        <PageHeader title="Maintenance plan" />
         <LoadFailed status={state.status} error={state.error} what="Plan" onRetry={() => reload()} backHref="/maintenance" backLabel="Back to plans" />
       </div>
     );
@@ -171,7 +169,6 @@ function PlanDetail({ planId }: { planId: string }) {
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
       {/* 1. System context */}
       <PageHeader
-        eyebrow="Maintenance · Mock data"
         title={system.label}
         subtitle={
           <>

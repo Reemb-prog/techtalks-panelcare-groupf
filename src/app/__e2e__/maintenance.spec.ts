@@ -88,6 +88,9 @@ test("empty, error and denied mock scenarios", async ({ page }) => {
   await expect(page.getByRole("heading", { level: 1, name: "Maintenance plans" })).toBeVisible({ timeout: 20_000 });
   const scenario = page.getByLabel("Mock data");
 
+  await scenario.selectOption("slow");
+  await expect(page.getByTestId("loading-skeleton")).toBeVisible();
+  await expect(page.getByTestId("loading-skeleton")).toHaveCount(0);
   await scenario.selectOption({ label: "No records" });
   await expect(page.getByRole("region", { name: "No maintenance plans yet" })).toBeVisible();
 

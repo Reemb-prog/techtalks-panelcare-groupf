@@ -45,8 +45,8 @@ export function AppShell({ session, children }: { session: Session; children: Re
       <MockBanner />
 
       <div className="flex flex-1">
-        <aside className="hidden w-64 shrink-0 flex-col border-r border-pc-border bg-pc-surface lg:flex">
-          <div className="flex flex-1 flex-col gap-6 p-4">
+        <aside className="hidden w-60 shrink-0 flex-col border-r border-pc-border bg-pc-surface lg:flex">
+          <div className="flex flex-1 flex-col gap-7 px-4 py-5">
             <Brand session={session} />
             <SidebarNav role={session.role} />
           </div>
@@ -54,7 +54,7 @@ export function AppShell({ session, children }: { session: Session; children: Re
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-pc-border bg-pc-surface/95 px-4 py-2 backdrop-blur sm:px-6">
+          <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-pc-border bg-pc-surface px-4 py-2.5 sm:px-6">
             <button
               ref={menuButtonRef}
               type="button"
@@ -75,7 +75,7 @@ export function AppShell({ session, children }: { session: Session; children: Re
             </p>
           </header>
 
-          <main id="main" tabIndex={-1} className="flex-1 px-4 py-6 outline-none sm:px-6 lg:px-8 lg:py-8">
+          <main id="main" tabIndex={-1} className="flex-1 px-4 py-6 outline-none sm:px-6 sm:py-8 lg:px-8 lg:py-9">
             {children}
           </main>
         </div>
@@ -92,7 +92,7 @@ export function AppShell({ session, children }: { session: Session; children: Re
         className="m-0 h-full max-h-none w-72 max-w-[85vw] bg-pc-surface p-0 text-pc-text shadow-pc-overlay"
       >
         <div className="flex h-full flex-col">
-          <div className="flex flex-1 flex-col gap-6 p-4">
+          <div className="flex flex-1 flex-col gap-7 px-4 py-5">
             <div className="flex items-center justify-between gap-2">
               <Brand session={session} />
               <button
@@ -185,10 +185,10 @@ function MockBanner() {
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => setHydrated(true), []);
   return (
-    <div role="region" aria-label="Mock mode" className="bg-pc-warning-bg text-pc-warning-text">
+    <div role="region" aria-label="Mock mode" className="border-b border-pc-warning-text/15 bg-pc-warning-bg text-pc-warning-text">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2 text-[length:var(--pc-type-control)] leading-[var(--pc-line-control)] sm:px-6">
         <p className="flex-1 basis-64">
-          <span className="mr-2 rounded-pc-pill bg-pc-warning-text px-2 text-[length:var(--pc-type-caption)] font-bold tracking-wide text-pc-warning-bg uppercase">
+          <span className="mr-2 rounded-pc-control border border-pc-warning-text/25 px-1.5 text-[length:var(--pc-type-caption)] font-semibold">
             Mock
           </span>
           Demo data in this tab only. Nothing is saved and this is not a real sign-in.
@@ -199,7 +199,7 @@ function MockBanner() {
             value={scenario}
             disabled={!hydrated}
             onChange={(event) => setScenario(event.target.value as MockScenario)}
-            className="min-h-9 rounded-pc-control border border-pc-warning-text/50 bg-pc-surface px-2 font-normal text-pc-text"
+            className="min-h-9 rounded-pc-control border border-pc-warning-text/55 bg-pc-surface px-2 font-normal text-pc-text"
           >
             {MOCK_SCENARIOS.map((value) => (
               <option key={value} value={value}>

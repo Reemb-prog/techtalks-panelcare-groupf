@@ -21,6 +21,7 @@ export function JobList() {
       <JobQuery
         load={load}
         loadingMessage="Loading your jobs…"
+        loadingLayout="cards"
         errorMessage="Unable to load your jobs."
         deniedMessage="You don't have permission to view these jobs."
       >
@@ -33,12 +34,12 @@ export function JobList() {
             <>
               <ul aria-label="Assigned jobs" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {items.map((job) => (
-                  <li key={job.id} className="flex min-w-0 flex-col gap-4 rounded-pc-card border border-pc-border bg-pc-surface p-4 shadow-pc-card">
+                  <li key={job.id} className="flex min-w-0 flex-col gap-4 rounded-pc-card border border-pc-border bg-pc-surface p-4 sm:p-5">
                     <div className="space-y-1">
                       <h2 className="break-words text-[length:var(--pc-type-card)] font-semibold">{job.siteLabel}</h2>
                       <p className="break-words text-pc-muted">{job.systemLabel}</p>
                     </div>
-                    <p className="flex flex-wrap items-center gap-2">
+                    <p className="flex flex-wrap items-center gap-x-3 gap-y-2 text-pc-muted">
                       <JobStatusBadge status={job.status} />
                       <span className="text-sm text-pc-muted"><JobDate date={job.scheduledDate} /></span>
                     </p>

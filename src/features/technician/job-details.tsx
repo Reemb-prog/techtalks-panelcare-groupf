@@ -113,12 +113,12 @@ export function JobDetails({ jobId }: { jobId: string }) {
           return (
           <div className={showInspection ? "grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)]" : "space-y-5 max-w-3xl"}>
             <section aria-labelledby="job-site"
-              className={`min-w-0 space-y-4 rounded-pc-card border border-pc-border bg-pc-surface p-5 shadow-pc-card ${showInspection ? "lg:sticky lg:top-20 lg:col-start-2 lg:row-start-1" : ""}`}>
+              className={`min-w-0 space-y-4 rounded-pc-card border border-pc-border bg-pc-surface p-5 ${showInspection ? "lg:sticky lg:top-20 lg:col-start-2 lg:row-start-1" : ""}`}>
               <div>
                 <h2 id="job-site" className="break-words text-[length:var(--pc-type-section)] font-semibold">{job.siteLabel}</h2>
                 {job.city && <p className="mt-1 text-pc-muted">{job.city}</p>}
               </div>
-              <dl className="grid gap-x-5 gap-y-4 sm:grid-cols-2">
+              <dl className="grid gap-x-5 gap-y-4 border-t border-pc-border pt-4 sm:grid-cols-2">
                 <div>
                   <dt className="text-sm text-pc-muted">Solar system</dt>
                   <dd className="break-words font-semibold">{job.systemLabel}</dd>

@@ -6,6 +6,7 @@
  */
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { ContentSkeleton } from "@/components/layout/loading-skeleton";
 import { useAdapters } from "@/components/layout/adapters-provider";
 import { roleHome } from "@/components/layout/nav-items";
 import type { Tone } from "@/features/dashboard/dashboard-view";
@@ -39,11 +40,10 @@ export function Chip({ tone, children }: { tone: Tone; children: ReactNode }) {
   );
 }
 
-export function PageHeader({ eyebrow, title, subtitle, actions }: { eyebrow: string; title: string; subtitle?: ReactNode; actions?: ReactNode }) {
+export function PageHeader({ title, subtitle, actions }: { title: string; subtitle?: ReactNode; actions?: ReactNode }) {
   return (
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div className="min-w-0">
-        <p className="text-[length:var(--pc-type-control)] font-semibold text-pc-primary">{eyebrow}</p>
         <h1 className="text-[length:var(--pc-type-page)] leading-[var(--pc-line-page)] font-bold break-words">{title}</h1>
         {subtitle && <p className="mt-1 text-pc-muted">{subtitle}</p>}
       </div>
@@ -55,7 +55,7 @@ export function PageHeader({ eyebrow, title, subtitle, actions }: { eyebrow: str
 /** Bordered white section with an optional heading row. */
 export function Section({ title, id, actions, children }: { title: string; id: string; actions?: ReactNode; children: ReactNode }) {
   return (
-    <section aria-labelledby={id} className="rounded-pc-panel border border-pc-border bg-pc-surface shadow-pc-card">
+    <section aria-labelledby={id} className="rounded-pc-panel border border-pc-border bg-pc-surface">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-pc-border px-4 py-3 sm:px-6">
         <h2 id={id} className="text-[length:var(--pc-type-card)] font-semibold">
           {title}
@@ -124,16 +124,8 @@ export function useLoad<T>(load: () => Promise<ApiResult<T>>): { state: LoadStat
   return { state, reload };
 }
 
-export function LoadingBlock({ label }: { label: string }) {
-  return (
-    <div aria-busy="true" className="flex flex-col gap-3">
-      <p role="status" className="sr-only">
-        {label}
-      </p>
-      <div aria-hidden="true" className="h-12 animate-pulse rounded-pc-card border border-pc-border bg-pc-surface" />
-      <div aria-hidden="true" className="h-56 animate-pulse rounded-pc-panel border border-pc-border bg-pc-surface" />
-    </div>
-  );
+export function LoadingBlock({ label, layout = "detail" }: { label: string; layout?: "detail" | "rows" | "form" }) {
+  return <ContentSkeleton label={label} layout={layout} />;
 }
 
 /** Failed load: signed out → back to sign-in; denied, not found and server errors each get their own panel. */
@@ -151,7 +143,7 @@ export function LoadFailed({ status, error, what, onRetry, backHref, backLabel }
     if (signedOut) signOut();
   }, [signedOut, signOut]);
 
-  if (signedOut) return <LoadingBlock label="Your demo session ended. Redirecting to sign in…" />;
+  if (signedOut) return <p role="status">Your demo session ended. Redirecting to sign in…</p>;
   if (status === 403) {
     return (
       <Panel tone="neutral" title="You don't have access to this page">
