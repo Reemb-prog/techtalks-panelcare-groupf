@@ -380,11 +380,12 @@ in the `test-results/pc-s1-08-phase4-*.log` files.
 
 ### Remaining limitations and lead handoff
 
-- Full CI is still red. The unchanged
+- Lead-approved scope exception (Reem, Nov 27, 2026): the
   [dashboard test](../../src/features/dashboard/__tests__/dashboard-view.test.ts#L105)
-  requires no comma after the weekday. Local Node 22.22.0 with ICU 77.1 produces
-  `Sunday, 22 November 2026`. The dashboard formatter and test match
-  `origin/main`. Reem should route the fix to the dashboard owner.
+  required no comma after the weekday, but ICU 76+ (Node 22.22.0, ICU 77.1)
+  produces `Sunday, 22 November 2026`. The assertion now accepts an optional
+  comma, like the short-date assertion beside it. This one test file is outside
+  PC-S1-08's paths, so `harness check` lists it; the formatter is unchanged.
 - At 375 px and 200% text, the shared mock scenario banner extended to 398 px.
   The technician content reflow check passed after the in-scope fixes.
   The banner belongs to shared layout and needs its own fix.
