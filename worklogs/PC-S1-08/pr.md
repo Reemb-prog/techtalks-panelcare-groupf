@@ -24,8 +24,8 @@ The merged dependencies are PC-S1-01 (`ae9decd`), PC-S1-02 (`9ba5934`), PC-S1-03
 ## Test evidence
 
 - Six form unit tests passed. They cover valid and invalid checklist and photo inputs and the final form payload. [Form tests](../../src/features/technician/__tests__/inspection-form.test.ts)
-- Three submission tests against the typed mock passed. They cover final validation, retry after partial photo registration, and replay after a lost confirmation response using the same submission ID. [Submission tests](../../src/features/technician/__tests__/inspection-submission.test.ts)
-- Nineteen technician browser cases passed across the desktop and mobile profiles. They exercise the complete assigned-job journey, required inputs, reading and photo boundaries, loading and empty states, errors and denied access, keyboard focus, retries, one-report duplicate protection, and both report roles. [Playwright spec](../../src/app/__e2e__/technician.spec.ts)
+- Eleven submission tests against the typed mock passed. They cover final validation, retry after partial photo registration, replay after a lost confirmation response using the same submission ID, and the action offered for each adapter failure (CONFLICT offers Reload job, including a second submission on an already completed job). [Submission tests](../../src/features/technician/__tests__/inspection-submission.test.ts)
+- Twenty-one technician browser cases passed across the desktop and mobile profiles. They exercise the complete assigned-job journey, required inputs, reading and photo boundaries, loading and empty states, errors and denied access, keyboard focus, retries, one-report duplicate protection, the browser Back confirmation, and both report roles. [Playwright spec](../../src/app/__e2e__/technician.spec.ts)
 
 | Final check on Nov 26, 2026 | Result |
 | --- | --- |
@@ -39,11 +39,25 @@ The visual review covered all six technician views and the seeded coordinator re
 
 The tests and screenshots use synthetic data and local preview images. Denied and unavailable mock reports hide details. The Sprint 1 scope has no live API, database, row-level security, storage or scheduler tests. Final customer wording (D06) and real-photo consent and retention (D07) are still pending. [Decisions](../../docs/DECISIONS.md)
 
+### Review fixes (Nov 27, 2026, lead-directed)
+
+| Check | Result |
+| --- | --- |
+| `node scripts/ci.mjs` (Node 23.1.0, ICU 75.1) | Exit 0: harness validation, ESLint, TypeScript, 138 of 138 Vitest tests and the production build passed. |
+| Technician Playwright spec (dev server, desktop and mobile) | 21 passed, 1 intentional skip. |
+| Dashboard, registry and home Playwright specs, one worker | 22 passed, 2 intentional skips. In a fully parallel run on the dev server some of these timed out and passed on the serial rerun. |
+| `node scripts/harness.mjs check` | Not run: this clone's member is `reem` and the check refuses a `tarek` branch. A manual scope diff found one file outside the task paths, the lead-approved dashboard test below. |
+
+- The dashboard long-date assertion now accepts the ICU 76+ weekday comma (lead-approved exception outside the task paths; the formatter is unchanged).
+- A completion or photo CONFLICT now offers **Reload job**, which drops the attempt and refetches the job, so a job completed elsewhere shows its report link and a changed checklist sends the technician back to it.
+- Registered photos can no longer be removed, which would orphan them on the job. Server field errors stay visible after **Edit inspection**. An unconfirmed photo registration offers **Retry submission**. Browser Back asks before discarding an unsent draft.
+- The Reload path could not be exercised in the browser because each page has its own mock store; unit tests cover it against the mock adapter.
+
 ## Edge cases and rollback
 
 - Loading, empty, denied and unavailable states keep private report content out of view. When a read fails, the technician or coordinator can retry it. If submission is uncertain, the flow checks job status before permitting a manual retry.
 - This change adds no migration or deployment step. Reverting it removes the demo technician screens and mock report views without a data migration.
-- The dashboard date assertion and the enlarged-text banner need shared UI follow-up. Full local CI remains blocked by the reproduced dashboard failure.
+- The enlarged-text banner needs a shared UI follow-up. After a successful submission, one extra Back press stays on the job page because of the Back-confirmation history entry.
 
 ## Where to look first
 
@@ -54,12 +68,12 @@ The tests and screenshots use synthetic data and local preview images. Denied an
 
 ## Human reviewer
 
-Mahdi is the assigned non-author reviewer. The review request and result are pending. The technician task is ready for human review. Merge readiness depends on clearing the CI failure and completing human review.
+Mahdi is the assigned non-author reviewer. The review request and result are pending. The technician task is ready for human review. Merge readiness depends on completing human review.
 
 - [x] Plan recorded and approved before implementation.
-- [x] Changes are in the allowed task paths and cover the three repository acceptance criteria.
+- [x] Changes are in the allowed task paths, except the lead-approved dashboard test fix, and cover the three repository acceptance criteria.
 - [x] Technician unit, mock submission and browser tests cover normal, invalid and error cases.
-- [x] Actual test results, skips and the CI blocker are recorded.
+- [x] Actual test results and skips are recorded; CI now passes.
 - [x] Screenshots and fixtures use synthetic data.
 - [x] Jira issue and review evidence are linked here.
 - [x] Live `main` was verified as included in the branch before retesting.

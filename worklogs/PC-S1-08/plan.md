@@ -500,6 +500,14 @@ files for both attempts and final output.
 - Live Jira was unavailable. The repository's KAN-20 definition and the
   confirmed plan were used for the acceptance review.
 
+## Review fixes (Nov 27, 2026)
+
+Reem (lead) directed these fixes from her review of PR 22. They were made by Claude Code in Reem's clone and pushed to this branch one commit per fix:
+`ce498e4` dashboard date test (lead-approved scope exception), `4709be3` Reload job on CONFLICT,
+`a2ec9c2` registered photos and server field errors on edit, `50007a9` photo retry and browser Back confirmation.
+Results are in [pr.md](pr.md#review-fixes-nov-27-2026-lead-directed): CI exit 0 with 138 unit tests; technician e2e 21 passed;
+other e2e specs 22 passed serially. `harness check` refused to run on this clone (member `reem` on a `tarek` branch), so scope was checked by hand.
+
 ## Developer review guide
 
 ### Review these first
