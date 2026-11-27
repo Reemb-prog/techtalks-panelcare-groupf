@@ -146,7 +146,11 @@ export function InspectionReview({
         {state.status === "error" && state.action === "retry" && <button className={primaryClass} type="button" onClick={onRetry}>Retry submission</button>}
         {state.status === "error" && state.action === "reload" && <button className={primaryClass} type="button" onClick={onReload}>Reload job</button>}
         {state.status === "error" && state.action === "edit" && (
-          <button className={primaryClass} type="button" onClick={() => onEdit(checklist ? "checklist" : evidence.length || state.photoId ? "photos" : "review")}>
+          <button className={primaryClass} type="button" onClick={() => {
+            // Keep the server's field messages visible once the form unlocks.
+            if (serverErrors) setErrors(serverErrors);
+            onEdit(checklist ? "checklist" : evidence.length || state.photoId ? "photos" : "review");
+          }}>
             Edit inspection
           </button>
         )}

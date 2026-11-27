@@ -76,17 +76,20 @@ export function PhotoEvidence({ jobId, photos, notes, registeredIds, headingRef,
                   onPhotosChange(photos.map((item) => item.id === photo.id ? { ...item, caption } : item));
                 }}
               />
-              <button
-                type="button"
-                className="min-h-[var(--pc-control-min-height)] rounded-pc-control px-1 font-semibold text-pc-primary underline"
-                aria-label={`Remove Photo ${index + 1}: ${photo.file.name}`}
-                onClick={() => {
-                  setErrors([]);
-                  onPhotosChange(photos.filter((item) => item.id !== photo.id));
-                }}
-              >
-                Remove Photo
-              </button>
+              {/* A registered photo is already attached to the job, so removing it here would leave it orphaned. */}
+              {!registeredIds.includes(photo.id) && (
+                <button
+                  type="button"
+                  className="min-h-[var(--pc-control-min-height)] rounded-pc-control px-1 font-semibold text-pc-primary underline"
+                  aria-label={`Remove Photo ${index + 1}: ${photo.file.name}`}
+                  onClick={() => {
+                    setErrors([]);
+                    onPhotosChange(photos.filter((item) => item.id !== photo.id));
+                  }}
+                >
+                  Remove Photo
+                </button>
+              )}
             </li>
           ))}
         </ul>
